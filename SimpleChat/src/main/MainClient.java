@@ -22,8 +22,9 @@ public class MainClient {
         System.out.print("Digite seu nome: ");
         String clienteName = KEYBOARD_INPUT.readLine();
         System.out.println("Digite '#sair' para sair do chat!\n");
-        Mensagem toServer;
+        
         controler = new Controler("127.0.0.1", 6789);
+        Mensagem toServer;
 
         Thread listener = createListener();
         listener.start();
@@ -63,5 +64,4 @@ public class MainClient {
 
         return listener;
     }
-
 }

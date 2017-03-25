@@ -13,7 +13,7 @@ public class Mensagem implements Serializable {
     private final String id;
     private String mensagem;
 
-    public Mensagem(String id, String destino, int porta) throws IOException {
+    public Mensagem(String id) throws IOException {
         this.id = id;
     }
 

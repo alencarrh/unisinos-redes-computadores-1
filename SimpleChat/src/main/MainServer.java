@@ -20,22 +20,19 @@ public class MainServer {
     public static void main(String[] args) throws IOException, InterruptedException {
         server = new ServerControler(6789);
 
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    server.startServer();
-                } catch (IOException ex) {
-                    Logger.getLogger(MainServer.class.getName()).log(Level.SEVERE, null, ex);
-                }
+        Thread startServer = new Thread(() -> {
+            try {
+                server.startServer();
+            } catch (IOException ex) {
+                Logger.getLogger(MainServer.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
 
-        t.start();
+        startServer.start();
 
         System.out.println("Preciona 'Enter' a qualquer momento para parar o servidor...");
         KEYBOARD_INPUT.readLine();
-//        t.interrupt();
+
         server.stopServer();
     }
 }

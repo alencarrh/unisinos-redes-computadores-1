@@ -22,10 +22,7 @@ public class Controler implements Serializable {
     private boolean conectionOpen;
 
     public Controler(String destino, int porta) throws IOException {
-        this.socket = new Socket(destino, porta);
-        this.output = new ObjectOutputStream(this.socket.getOutputStream());
-        this.input = new ObjectInputStream(this.socket.getInputStream());
-        this.conectionOpen = true;
+        this(new Socket(destino, porta));
     }
 
     public Controler(Socket socket) throws IOException {
@@ -65,11 +62,8 @@ public class Controler implements Serializable {
             if (isConectionOpen()) {
                 return (Mensagem) input.readObject();
             }
-            return new Mensagem("", "FIM");
-        } catch (IOException ex) {
-            Logger.getLogger(Controler.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        } catch (ClassNotFoundException ex) {
+            return new Mensagem("finish_connection", null);
+        } catch (IOException | ClassNotFoundException ex) {
             Logger.getLogger(Controler.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
