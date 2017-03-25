@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package classes;
 
 import java.io.IOException;
@@ -11,10 +6,13 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.Socket;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- *
- * @author alenc
+ * @class Controler
+ * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
+ * @date 25/03/2017
  */
 public class Controler implements Serializable {
 
@@ -56,7 +54,7 @@ public class Controler implements Serializable {
                 output.flush();
             }
         } catch (IOException ex) {
-            ex.printStackTrace();
+            Logger.getLogger(Controler.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
         return true;
@@ -69,15 +67,15 @@ public class Controler implements Serializable {
             }
             return new Mensagem("", "FIM");
         } catch (IOException ex) {
-            ex.printStackTrace();
+            Logger.getLogger(Controler.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
+            Logger.getLogger(Controler.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
     }
 
-     public void close(boolean sendSignalToClose) throws IOException {
+    public void close(boolean sendSignalToClose) throws IOException {
         if (sendSignalToClose) {
             enviar(new Mensagem("finish_connection", null));
         }

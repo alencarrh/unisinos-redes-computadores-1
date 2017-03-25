@@ -8,8 +8,9 @@ import java.util.logging.Logger;
 import server.ServerControler;
 
 /**
- *
- * @author alenc
+ * @class MainServer
+ * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
+ * @date 25/03/2017
  */
 public class MainServer {
 

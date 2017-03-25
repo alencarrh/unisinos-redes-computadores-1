@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package server;
 
 import classes.Controler;
@@ -13,8 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
- * @author alenc
+ * @class ServerControler
+ * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
+ * @date 25/03/2017 
  */
 public class ServerControler implements Serializable {
 

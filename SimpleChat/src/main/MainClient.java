@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package main;
 
 import classes.Controler;
@@ -14,8 +9,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
- * @author alenc
+ * @class MainClient
+ * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
+ * @date 25/03/2017 
  */
 public class MainClient {
 
@@ -45,26 +41,23 @@ public class MainClient {
     }
 
     private static Thread createListener() {
-        Thread listener = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (controler.isConectionOpen()) {
-                    Mensagem fromServer = controler.receber();
-                    if ("finish_connection".equalsIgnoreCase(fromServer.getId())) {
-                        try {
-                            controler.close(false);
-                            //TODO tudo é finalizado, porém, fica no aguardo de um enter do "readLine()", 
-                            //e só após isto encerra a execução, então, o System.exit(0) se encarrega de encerrar imaditamente.
-                            System.exit(0);
-                        } catch (IOException ex) {
-                            Logger.getLogger(MainClient.class.getName()).log(Level.SEVERE, null, ex);
-                        }
+        Thread listener = new Thread(() -> {
+            while (controler.isConectionOpen()) {
+                Mensagem fromServer = controler.receber();
+                if ("finish_connection".equalsIgnoreCase(fromServer.getId())) {
+                    try {
+                        controler.close(false);
+                        //TODO tudo é finalizado, porém, fica no aguardo de um enter do "readLine()",
+                        //e só após isto encerra a execução, então, o System.exit(0) se encarrega de encerrar imaditamente.
+                        System.exit(0);
+                    } catch (IOException ex) {
+                        Logger.getLogger(MainClient.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                    if (!"ok_connection".equalsIgnoreCase(fromServer.getId())) {
-                        System.out.println(fromServer);
-                    }
-
                 }
+                if (!"ok_connection".equalsIgnoreCase(fromServer.getId())) {
+                    System.out.println(fromServer);
+                }
+                
             }
         });
 

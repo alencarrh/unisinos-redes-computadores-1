@@ -9,6 +9,12 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * @class Server
+ * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
+ * @date 25/03/2017 
+ */
+
 public class Server extends Thread implements Serializable {
 
     private static final List<Controler> ALL_CONNECTIONS = new ArrayList<>();
