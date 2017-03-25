@@ -1,0 +1,40 @@
+package main;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import server.ServerControler;
+
+/**
+ *
+ * @author alenc
+ */
+public class MainServer {
+
+    static ServerControler server;
+    private static final BufferedReader KEYBOARD_INPUT = new BufferedReader(new InputStreamReader(System.in));
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+        server = new ServerControler(6789);
+
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    server.startServer();
+                } catch (IOException ex) {
+                    Logger.getLogger(MainServer.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+
+        t.start();
+
+        System.out.println("Preciona 'Enter' a qualquer momento para parar o servidor...");
+        KEYBOARD_INPUT.readLine();
+//        t.interrupt();
+        server.stopServer();
+    }
+}
