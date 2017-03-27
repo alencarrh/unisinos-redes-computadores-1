@@ -14,18 +14,18 @@ import java.util.logging.Logger;
  * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
  * @date 25/03/2017
  */
-public class Controler implements Serializable {
+public class Controller implements Serializable {
 
     private final Socket socket;
     private final ObjectOutputStream output;
     private final ObjectInputStream input;
     private boolean conectionOpen;
 
-    public Controler(String destino, int porta) throws IOException {
+    public Controller(String destino, int porta) throws IOException {
         this(new Socket(destino, porta));
     }
 
-    public Controler(Socket socket) throws IOException {
+    public Controller(Socket socket) throws IOException {
         this.socket = socket;
         this.output = new ObjectOutputStream(socket.getOutputStream());
         this.input = new ObjectInputStream(this.socket.getInputStream());
@@ -51,7 +51,7 @@ public class Controler implements Serializable {
                 output.flush();
             }
         } catch (IOException ex) {
-            Logger.getLogger(Controler.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
         return true;
@@ -64,7 +64,7 @@ public class Controler implements Serializable {
             }
             return new Mensagem("finish_connection", null);
         } catch (IOException | ClassNotFoundException ex) {
-            Logger.getLogger(Controler.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
     }
@@ -96,7 +96,7 @@ public class Controler implements Serializable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final Controler other = (Controler) obj;
+        final Controller other = (Controller) obj;
         return Objects.equals(this.socket, other.socket);
     }
 

@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import server.ServerControler;
+import server.ServerController;
 
 /**
  * @class MainServer
@@ -14,11 +14,11 @@ import server.ServerControler;
  */
 public class MainServer {
 
-    static ServerControler server;
+    static ServerController server;
     private static final BufferedReader KEYBOARD_INPUT = new BufferedReader(new InputStreamReader(System.in));
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        server = new ServerControler(6789);
+        server = new ServerController(6789);
 
         Thread startServer = new Thread(() -> {
             try {

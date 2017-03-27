@@ -1,6 +1,6 @@
 package server;
 
-import classes.Controler;
+import classes.Controller;
 import classes.Mensagem;
 import java.io.IOException;
 import java.io.Serializable;
@@ -17,10 +17,10 @@ import java.util.logging.Logger;
 
 public class Server extends Thread implements Serializable {
 
-    private static final List<Controler> ALL_CONNECTIONS = new ArrayList<>();
-    private final Controler controler;
+    private static final List<Controller> ALL_CONNECTIONS = new ArrayList<>();
+    private final Controller controler;
 
-    public Server(Controler controler) {
+    public Server(Controller controler) {
         this.controler = controler;
     }
 
@@ -50,19 +50,19 @@ public class Server extends Thread implements Serializable {
         });
     }
 
-    public void addConnections(List<Controler> newConnections) {
+    public void addConnections(List<Controller> newConnections) {
         newConnections.forEach(connection -> {
             addConnection(connection);
         });
     }
 
-    public void addConnection(Controler newConnection) {
+    public void addConnection(Controller newConnection) {
         if (!connectionExists(newConnection)) {
             ALL_CONNECTIONS.add(newConnection);
         }
     }
 
-    public static boolean connectionExists(Controler connection) {
+    public static boolean connectionExists(Controller connection) {
         return ALL_CONNECTIONS.contains(connection);
     }
 

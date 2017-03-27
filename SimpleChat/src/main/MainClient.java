@@ -1,6 +1,6 @@
 package main;
 
-import classes.Controler;
+import classes.Controller;
 import classes.Mensagem;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,19 +11,22 @@ import java.util.logging.Logger;
 /**
  * @class MainClient
  * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
- * @date 25/03/2017 
+ * @date 25/03/2017
  */
 public class MainClient {
 
-    private static Controler controler;
+    private static Controller controler;
     private static final BufferedReader KEYBOARD_INPUT = new BufferedReader(new InputStreamReader(System.in));
 
     public static void main(String[] args) throws IOException {
         System.out.print("Digite seu nome: ");
         String clienteName = KEYBOARD_INPUT.readLine();
         System.out.println("Digite '#sair' para sair do chat!\n");
-        
-        controler = new Controler("127.0.0.1", 6789);
+        if (args.length == 0) {
+            controler = new Controller("127.0.0.1", 6789);
+        }else{
+            controler = new Controller(args[0], 6789);
+        }
         Mensagem toServer;
 
         Thread listener = createListener();
@@ -58,7 +61,7 @@ public class MainClient {
                 if (!"ok_connection".equalsIgnoreCase(fromServer.getId())) {
                     System.out.println(fromServer);
                 }
-                
+
             }
         });
 
