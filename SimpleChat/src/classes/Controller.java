@@ -44,6 +44,13 @@ public class Controller implements Serializable {
         return input;
     }
 
+    /**
+     * Faz o envio de uma mensagem para o servidor.
+     *
+     * @param msg
+     * @return <i>true</i> se a mensagem foi enviada com sucesso. <i>false</i>
+     * caso houve algum problema no envio.
+     */
     public boolean enviar(Mensagem msg) {
         try {
             if (isConectionOpen()) {
@@ -57,6 +64,11 @@ public class Controller implements Serializable {
         return true;
     }
 
+    /**
+     * Aguarda o recebimento de uma mensagem do servidor.
+     *
+     * @return <i>mensagem</i> do servidor.
+     */
     public Mensagem receber() {
         try {
             if (isConectionOpen()) {
@@ -69,6 +81,13 @@ public class Controller implements Serializable {
         }
     }
 
+    /**
+     * Finaliza esta conexão. Caso <i>sendSignalToClose</i> seja <i>true</i> é
+     * feito o envio de uma mensagem com o sinal de finalização.
+     *
+     * @param sendSignalToClose
+     * @throws IOException
+     */
     public void close(boolean sendSignalToClose) throws IOException {
         if (sendSignalToClose) {
             enviar(new Mensagem("finish_connection", null));

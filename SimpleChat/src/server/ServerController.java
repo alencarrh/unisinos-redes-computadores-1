@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * @class ServerControler
  * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
- * @date 25/03/2017 
+ * @date 25/03/2017
  */
 public class ServerController implements Serializable {
 
@@ -31,8 +31,10 @@ public class ServerController implements Serializable {
         this.running = true;
         System.out.println("Server iniciado!");
         while (running) {
+            //Agurda alguma conexão
             Controller newConnection = new Controller(serverSocket.accept());
             if (!Server.connectionExists(newConnection)) {
+                //Caso esta conexão seja nova, inicia uma thread para monitorar esta, adicionando esta a lista de conexões ativas.
                 Server serverTemp = new Server(newConnection);
                 serverTemp.addConnection(newConnection);
                 servers.add(serverTemp);
@@ -42,6 +44,7 @@ public class ServerController implements Serializable {
     }
 
     public void stopServer() throws IOException {
+        //Finaliza todas as conexões e posteriormente finaliza o servidor.
         if (isRunning()) {
             this.running = false;
             this.servers.forEach((server) -> {

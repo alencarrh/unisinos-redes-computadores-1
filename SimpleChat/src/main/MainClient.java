@@ -22,6 +22,8 @@ public class MainClient {
         System.out.print("Digite seu nome: ");
         String clienteName = KEYBOARD_INPUT.readLine();
         System.out.println("Digite '#sair' para sair do chat!\n");
+        
+        //Verifica se o IP do servidor foi passado por parâmetro
         if (args.length == 0) {
             controler = new Controller("127.0.0.1", 6789);
         }else{
@@ -29,15 +31,19 @@ public class MainClient {
         }
         Mensagem toServer;
 
+        //Cria Thread que ficará escutando a porta(retorno do servidor)
         Thread listener = createListener();
         listener.start();
 
+        //#sair encerra a conexão com o servidor.
         while (controler.isConectionOpen()) {
             toServer = new Mensagem(clienteName, KEYBOARD_INPUT.readLine());
             if (controler.isConectionOpen()) {
                 if ("#sair".equalsIgnoreCase(toServer.getMensagem())) {
+                     //envia mensagem indicando que o cliente irá finalizar a conexão.
                     controler.enviar(new Mensagem("finish_connection", null));
                 } else {
+                    //envia mensagem
                     controler.enviar(toServer);
                 }
             }
@@ -48,6 +54,7 @@ public class MainClient {
         Thread listener = new Thread(() -> {
             while (controler.isConectionOpen()) {
                 Mensagem fromServer = controler.receber();
+                //Sinal do servidor para finalizar a conexão do cliente.
                 if ("finish_connection".equalsIgnoreCase(fromServer.getId())) {
                     try {
                         controler.close(false);
@@ -58,6 +65,7 @@ public class MainClient {
                         Logger.getLogger(MainClient.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
+                //Retorno de confirmação de recebimento de mensagem do servidor.
                 if (!"ok_connection".equalsIgnoreCase(fromServer.getId())) {
                     System.out.println(fromServer);
                 }
