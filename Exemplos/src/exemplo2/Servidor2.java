@@ -1,28 +1,21 @@
-package exemplo3;
+package exemplo2;
 
 import java.io.*;
 import java.net.*;
 
-class Servidor3 {
-
-    //private Pessoa p;
+class Servidor2 {
     public static void main(String argv[]) throws Exception {
-        Pessoa p;
+        System.out.println("SERVIDOR2!");
         String fraseCliente;
         String fraseMaiusculas;
 
         ServerSocket socketRecepcao = new ServerSocket(6789);
 
         Socket socketConexao = socketRecepcao.accept();
-        //BufferedReader doCliente = new BufferedReader(new InputStreamReader(socketConexao.getInputStream()));
-        //DataOutputStream paraCliente = new DataOutputStream(socketConexao.getOutputStream());
-
-        ObjectInputStream input = new ObjectInputStream(socketConexao.getInputStream());
-        p = (Pessoa) input.readObject();
-
-        System.out.println(p.getNome() + " nasceu em " + p.getData());
-
-        /*while(true) {
+        BufferedReader doCliente = new BufferedReader(new InputStreamReader(socketConexao.getInputStream()));
+        DataOutputStream paraCliente = new DataOutputStream(socketConexao.getOutputStream());
+        
+        while(true) {
             
             fraseCliente= doCliente.readLine();
             if(fraseCliente.equals("FIM")){
@@ -32,7 +25,7 @@ class Servidor3 {
                 fraseMaiusculas= fraseCliente.toUpperCase() + '\n';
                 paraCliente.writeBytes(fraseMaiusculas);
             }
-        }*/
-        socketConexao.close();
+        }
     }
 }
+

@@ -10,7 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * @class Controler
+ * @class Controller
  * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
  * @date 25/03/2017
  */

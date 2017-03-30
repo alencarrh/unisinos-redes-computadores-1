@@ -6,7 +6,7 @@ import java.net.*;
 public class Cliente3 {
 
     public static void main(String argv[]) throws Exception {
-
+        System.out.println("CLIENTE3!");
         String frase;
         String fraseModificada;
         ObjectOutputStream output;

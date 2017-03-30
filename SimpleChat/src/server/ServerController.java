@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @class ServerControler
+ * @class ServerController
  * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
  * @date 25/03/2017
  */
