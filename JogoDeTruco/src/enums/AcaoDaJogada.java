@@ -20,7 +20,8 @@ public enum AcaoDaJogada {
     TRUCO,
     RETRUCO,
     VALE_QUATRO,
-    
-    
+    IR_PARA_BARALHO,
+    ESCONDER_CARTA,
+    DAR_AS_CARTAS
 
 }

@@ -4,6 +4,10 @@ import enums.AcaoDaJogada;
 import enums.Carta;
 
 /**
+ * Jogada: É a ação de um dos jogadores. Seja esta ação um jogada simples ou
+ * chamada de Truco e seus aumentos, Envido e seus aumentos ou Flor e seus
+ * aumentos.
+ *
  * @class Jogada
  * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
  * @date 30/03/2017

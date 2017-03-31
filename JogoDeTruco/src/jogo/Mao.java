@@ -1,34 +1,36 @@
 package jogo;
 
-import enums.Carta;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
+ * Mão: Fração da partida, vale 1 ponto e poderá ter seu valor aumentado através
+ * das disputas de Truco e Envido. É disputada em melhor de 3 rodadas.
+ *
  * @class Mao
  * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
  * @date 30/03/2017
  */
 public class Mao {
 
-    private final Carta carta1;
-    private final Carta carta2;
-    private final Carta carta3;
+    private final List<Rodada> rodadas;
+    private int tentos;
 
-    public Mao(Carta carta1, Carta carta2, Carta carta3) {
-        this.carta1 = carta1;
-        this.carta2 = carta2;
-        this.carta3 = carta3;
+    public Mao() {
+        rodadas = new ArrayList<>();
+        tentos = 1;
     }
 
-    public Carta getCarta1() {
-        return carta1;
+    public int getTentos() {
+        return tentos;
     }
 
-    public Carta getCarta2() {
-        return carta2;
+    public void aumentarTentosDaMao(int tentosAAumentar) {
+        this.tentos += tentosAAumentar;
     }
 
-    public Carta getCarta3() {
-        return carta3;
+    public List<Rodada> getRodadas() {
+        return rodadas;
     }
 
 }
