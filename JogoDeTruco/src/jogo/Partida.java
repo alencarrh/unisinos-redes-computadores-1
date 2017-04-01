@@ -1,5 +1,6 @@
 package jogo;
 
+import enums.StatusDaPartida;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,13 +14,15 @@ import java.util.List;
  */
 public class Partida extends Thread {
 
+    private final StatusDaPartida status;
     private final List<Jogador> jogadores;
     private final List<Mao> maos;
 
-    public Partida(Jogador primeiroJogador) {
+    public Partida(Jogador primeiroJogador, StatusDaPartida status) {
         this.maos = new ArrayList<>();
         this.jogadores = new ArrayList<>();
         this.jogadores.add(primeiroJogador);
+        this.status = status;
     }
 
     public void addJogador(Jogador outroJogador) {
@@ -32,7 +35,7 @@ public class Partida extends Thread {
 
     @Override
     public void run() {
-
+        //PRIMEIRA AÇÃO É DAR AS CARTAS
         // TODO: aqui estará toda a lógica do jogo. 
         // 1. Deverá aguarda a ação do jogadorX e tratar a jogada deste. 
         // 2. Aguardar para que o jogadorX+1 jogue para tratar sua jogada e 

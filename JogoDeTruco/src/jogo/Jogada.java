@@ -2,6 +2,7 @@ package jogo;
 
 import enums.AcaoDaJogada;
 import enums.Carta;
+import java.io.Serializable;
 
 /**
  * Jogada: É a ação de um dos jogadores. Seja esta ação um jogada simples ou
@@ -12,7 +13,7 @@ import enums.Carta;
  * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
  * @date 30/03/2017
  */
-public class Jogada {
+public class Jogada implements Serializable {
 
     private final AcaoDaJogada acaoDaJogada;
     private final Carta carta;
@@ -28,6 +29,11 @@ public class Jogada {
 
     public Carta getCarta() {
         return carta;
+    }
+
+    @Override
+    public String toString() {
+        return "Jogada{" + "acaoDaJogada=" + acaoDaJogada + ", carta=" + carta + '}';
     }
 
 }

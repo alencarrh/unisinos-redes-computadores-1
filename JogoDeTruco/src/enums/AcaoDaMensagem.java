@@ -6,8 +6,8 @@ package enums;
  * @date 30/03/2017
  */
 public enum AcaoDaMensagem {
-
-    INICIAR_CONEXAO,
+    
+    JOGADOR_CRIADO,
     FINALIZAR_CONEXAO,
     CRIAR_PARTIDA,
     LISTA_PARTIDAS_DISPONIVEIS,
@@ -15,4 +15,5 @@ public enum AcaoDaMensagem {
     SAIR_DA_PARTIDA,
     MOSTRAR_RESULTADO_FINAL,
     JOGADA
+
 }

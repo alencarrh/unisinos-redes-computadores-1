@@ -1,28 +1,22 @@
 package comunicacao;
 
-import jogo.Jogada;
 import enums.AcaoDaMensagem;
 import enums.DirecaoDaMensagem;
-import jogo.Jogador;
+import java.io.Serializable;
 
 /**
  * @class Mensagem
  * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
  * @date 30/03/2017
  */
-public class Mensagem {
+public class Mensagem implements Serializable {
 
     private final DirecaoDaMensagem direcaoDaMensagem;
     private final AcaoDaMensagem acaoDaMensagem;
-    private final Jogador jogador;
-    private final Jogada jogada;
-    private String opcao;
 
-    public Mensagem(DirecaoDaMensagem direcaoDaMensagem, AcaoDaMensagem acaoDaMensagem, Jogador jogador, Jogada jogada) {
+    public Mensagem(DirecaoDaMensagem direcaoDaMensagem, AcaoDaMensagem acaoDaMensagem) {
         this.direcaoDaMensagem = direcaoDaMensagem;
         this.acaoDaMensagem = acaoDaMensagem;
-        this.jogador = jogador;
-        this.jogada = jogada;
     }
 
     public DirecaoDaMensagem getDirecaoDaMensagem() {
@@ -33,20 +27,9 @@ public class Mensagem {
         return acaoDaMensagem;
     }
 
-    public Jogador getJogador() {
-        return jogador;
-    }
-
-    public Jogada getJogada() {
-        return jogada;
-    }
-
-    public String getOpcao() {
-        return opcao;
-    }
-
-    public void setOpcao(String opcao) {
-        this.opcao = opcao;
+    @Override
+    public String toString() {
+        return "Mensagem{" + "direcaoDaMensagem=" + direcaoDaMensagem + ", acaoDaMensagem=" + acaoDaMensagem + '}';
     }
 
 }

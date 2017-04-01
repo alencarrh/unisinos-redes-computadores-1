@@ -1,6 +1,7 @@
 package jogo;
 
 import enums.StatusDaPartida;
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -8,17 +9,17 @@ import java.util.List;
  * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
  * @date 31/03/2017
  */
-public class Sala {
+public class Sala implements Serializable {
 
     private StatusDaPartida status;
     private final Long idSala;
     private final String nome;
-    private Partida partida;
+    private final Partida partida;
 
     public Sala(Long idSala, String nome, Jogador primeiroJogador) {
         this.idSala = idSala;
         this.nome = nome;
-        this.partida = new Partida(primeiroJogador);
+        this.partida = new Partida(primeiroJogador, status);
         this.status = StatusDaPartida.AGUARDANDO_JOGADOR;
     }
 

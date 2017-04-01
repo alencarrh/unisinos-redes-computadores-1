@@ -1,24 +1,25 @@
 package jogo;
 
+import comunicacao.ControladorConexao;
+import java.io.Serializable;
+import java.util.Objects;
+
 /**
  * @class Player
  * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
  * @date 30/03/2017
  */
-public class Jogador extends Thread {
+public class Jogador extends Thread implements Serializable {
 
-    private Long idPlayer;
-    private final String nome;
+    private final Long idJogador;
+    private final ControladorConexao conexao;
+    private final String nomeJogador;
     private int tentos;
 
-    public Jogador(Long idPlayer, String nome) {
-        this.idPlayer = idPlayer;
-        this.nome = nome;
-        this.tentos = 0;
-    }
-
-    public Jogador(String nome) {
-        this.nome = nome;
+    public Jogador(Long idPlayer, String nome, ControladorConexao conexao) {
+        this.idJogador = idPlayer;
+        this.nomeJogador = nome;
+        this.conexao = conexao;
         this.tentos = 0;
     }
 
@@ -27,12 +28,8 @@ public class Jogador extends Thread {
 
     }
 
-    public Long getIdPlayer() {
-        return idPlayer;
-    }
-
-    public void setIdPlayer(Long idPlayer) {
-        this.idPlayer = idPlayer;
+    public Long getIdJogador() {
+        return idJogador;
     }
 
     public int getTentos() {
@@ -41,6 +38,40 @@ public class Jogador extends Thread {
 
     public void setTentos(int tentos) {
         this.tentos = tentos;
+    }
+
+    public ControladorConexao getConexao() {
+        return conexao;
+    }
+
+    public String getNomeJogador() {
+        return nomeJogador;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Jogador other = (Jogador) obj;
+        return Objects.equals(this.conexao, other.conexao);
+    }
+
+    @Override
+    public String toString() {
+        return this.nomeJogador;
     }
 
 }

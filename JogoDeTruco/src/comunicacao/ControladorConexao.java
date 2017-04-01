@@ -5,6 +5,7 @@ import enums.DirecaoDaMensagem;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.Socket;
 import java.util.Objects;
 import java.util.logging.Level;
@@ -15,7 +16,7 @@ import java.util.logging.Logger;
  * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
  * @date 31/03/2017
  */
-public class ControladorConexao {
+public class ControladorConexao implements Serializable {
 
     private final Socket socket;
     private final ObjectOutputStream output;
@@ -77,7 +78,7 @@ public class ControladorConexao {
             if (isConectionOpen()) {
                 return (Mensagem) input.readObject();
             }
-            return new Mensagem(this.direcaoDaMensagem, AcaoDaMensagem.FINALIZAR_CONEXAO, null, null);
+            return new Mensagem(this.direcaoDaMensagem, AcaoDaMensagem.FINALIZAR_CONEXAO);
         } catch (IOException | ClassNotFoundException ex) {
             Logger.getLogger(ControladorConexao.class.getName()).log(Level.SEVERE, null, ex);
             return null;
@@ -93,7 +94,7 @@ public class ControladorConexao {
      */
     public void close(boolean sendSignalToClose) throws IOException {
         if (sendSignalToClose) {
-            enviar(new Mensagem(this.direcaoDaMensagem, AcaoDaMensagem.FINALIZAR_CONEXAO, null, null));
+            enviar(new Mensagem(this.direcaoDaMensagem, AcaoDaMensagem.FINALIZAR_CONEXAO));
         }
         this.conectionOpen = false;
         this.output.close();

@@ -1,5 +1,6 @@
 package jogo;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +12,7 @@ import java.util.List;
  * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
  * @date 30/03/2017
  */
-public class Mao {
+public class Mao implements Serializable {
 
     private final List<Rodada> rodadas;
     private int tentos;
