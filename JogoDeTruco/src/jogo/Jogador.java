@@ -13,7 +13,7 @@ public class Jogador extends Thread implements Serializable {
 
     private final Long idJogador;
     private final ControladorConexao conexao;
-    private final String nomeJogador;
+    private String nomeJogador;
     private int tentos;
 
     public Jogador(Long idPlayer, String nome, ControladorConexao conexao) {
@@ -48,6 +48,10 @@ public class Jogador extends Thread implements Serializable {
         return nomeJogador;
     }
 
+    public void setNomeJogador(String nomeJogador) {
+        this.nomeJogador = nomeJogador;
+    }
+
     @Override
     public int hashCode() {
         int hash = 3;
@@ -71,7 +75,7 @@ public class Jogador extends Thread implements Serializable {
 
     @Override
     public String toString() {
-        return this.nomeJogador;
+        return "Jogador{" + "idJogador=" + idJogador + ", nomeJogador=" + nomeJogador + ", tentos=" + tentos + '}';
     }
 
 }

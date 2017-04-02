@@ -2,7 +2,10 @@ package main;
 
 import comunicacao.ControladorConexao;
 import comunicacao.Mensagem;
+import comunicacao.MensagemEntrarEmPartida;
 import comunicacao.MensagemJogador;
+import comunicacao.MensagemOpcoes;
+import comunicacao.Opcao;
 import enums.AcaoDaMensagem;
 import enums.DirecaoDaMensagem;
 import java.io.BufferedReader;
@@ -26,13 +29,15 @@ public class ClienteMain {
         iniciarInformacoesSobreJogador();
         definirNomeJogador();
 
-        //Cria Thread que ficará escutando a porta(retorno do servidor)
-        Thread listener = createListener();
-        listener.start();
-
-//        while (conexao.isConectionOpen()) {
-//            
-//        }
+//        //Cria Thread que ficará escutando a porta(retorno do servidor)
+//        Thread listener = createListener();
+//        listener.start();
+//        
+        solicitaSalasDisponiveis();
+        while (conexao.isConectionOpen()) {
+            Mensagem msg = conexao.receber();
+            tratarMensagem(msg);
+        }
     }
 
     private static void estabelecerConexaoComServidor(String[] args) throws IOException {
@@ -52,14 +57,6 @@ public class ClienteMain {
                 Mensagem fromServer = conexao.receber();
                 System.out.println(fromServer);
                 switch (fromServer.getAcaoDaMensagem()) {
-                    case JOGADOR_CRIADO:
-                        break;
-                    case FINALIZAR_CONEXAO:
-                        break;
-                    case MOSTRAR_RESULTADO_FINAL:
-                        break;
-                    case LISTA_PARTIDAS_DISPONIVEIS:
-                        break;
 
                 }
             }
@@ -80,10 +77,51 @@ public class ClienteMain {
     }
 
     private static void definirNomeJogador() throws IOException {
-        System.out.print("\nDigite seu nome(#randam para escolher um nome aleatorio): ");
+        System.out.print("\nDigite seu nome(#random para escolher um nome aleatorio): ");
         String nomeJogador = KEYBOARD_INPUT.readLine();
         if (nomeJogador != null && !nomeJogador.isEmpty() && !nomeJogador.equalsIgnoreCase("#random")) {
-            jogador.setName(nomeJogador);
+            jogador.setNomeJogador(nomeJogador);
+            conexao.enviar(new MensagemJogador(DirecaoDaMensagem.PARA_SERVIDOR, AcaoDaMensagem.JOGADOR_CRIADO, jogador));
         }
+    }
+
+    private static void tratarMensagem(Mensagem msg) throws IOException {
+        switch (msg.getAcaoDaMensagem()) {
+            case FINALIZAR_CONEXAO:
+                //finalizar conexão
+                break;
+            case LISTA_PARTIDAS_DISPONIVEIS:
+                //lista salas disponíveis
+                mostrarSalasDiponiveis((MensagemOpcoes) msg);
+                break;
+            case MOSTRAR_RESULTADO_FINAL:
+                //mostra placar final
+                break;
+            case JOGADA:
+                //realizar jogada
+                break;
+        }
+    }
+
+    private static void solicitaSalasDisponiveis() {
+        conexao.enviar(new Mensagem(DirecaoDaMensagem.PARA_SERVIDOR, AcaoDaMensagem.LISTA_PARTIDAS_DISPONIVEIS));
+    }
+
+    private static void mostrarSalasDiponiveis(MensagemOpcoes mensagemOpcoes) throws IOException {
+        mensagemOpcoes.getOpcoes().forEach((opcao) -> {
+            System.out.println(opcao);
+        });
+        System.out.println(new Opcao("0", "Criar uma nova sala"));
+        System.out.print(mensagemOpcoes.getPergunta());
+        String inputUsuario = KEYBOARD_INPUT.readLine();
+        Mensagem msg;
+        if (inputUsuario.equals("0")) {
+            msg = new Mensagem(DirecaoDaMensagem.PARA_SERVIDOR, AcaoDaMensagem.CRIAR__NOVA_PARTIDA);
+            System.out.println("No aguardo de outro jogador para iniciar a partida...\n");
+        } else {
+            System.out.println("Entrando nada sala do jogador " + mensagemOpcoes.getOpcoes().get(new Integer(inputUsuario)-1).labelOpcao);
+            msg = new MensagemEntrarEmPartida(DirecaoDaMensagem.PARA_SERVIDOR, AcaoDaMensagem.ENTRAR_NA_PARTIDA, inputUsuario);
+        }
+        conexao.enviar(msg);
     }
 }
