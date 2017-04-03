@@ -20,6 +20,7 @@ public class Sala implements Serializable {
         this.idSala = idSala;
         this.nome = nome;
         this.partida = new Partida(primeiroJogador, status);
+        this.partida.start();
         this.status = StatusDaPartida.AGUARDANDO_JOGADOR;
     }
 
@@ -36,7 +37,7 @@ public class Sala implements Serializable {
     public boolean addJogador(Jogador outroJogador) {
         if (StatusDaPartida.AGUARDANDO_JOGADOR.equals(this.status)) {
             this.partida.addJogador(outroJogador);
-            this.partida.start();
+            //this.partida.start();
             this.status = StatusDaPartida.EM_ANDAMENTO;
             return true;
         }

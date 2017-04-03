@@ -24,7 +24,7 @@ public class Servidor implements Serializable {
     private final ServerSocket serverSocket;
     private boolean rodando;
 
-    public Servidor(int port) throws IOException {
+     public Servidor(int port) throws IOException {
         this.serverSocket = new ServerSocket(port);
         this.rodando = Boolean.FALSE;
         this.nextJogadorId = new Long(1);

@@ -34,4 +34,8 @@ public class Mao implements Serializable {
         return rodadas;
     }
 
+    public void setTentos(int tentos) {
+        this.tentos = tentos;
+    }
+
 }

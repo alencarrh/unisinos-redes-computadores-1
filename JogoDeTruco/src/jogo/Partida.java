@@ -36,8 +36,15 @@ public class Partida extends Thread {
     @Override
     public void run() {
         //PRIMEIRA AÇÃO É DAR AS CARTAS
+        if (status.equals(status.EM_ANDAMENTO)) {
+            System.out.println("Distribuindo Cartas...");
+            for (int i = 0; i < jogadores.size(); i++) {
+                jogadores.get(i).setCartas(new Jogo().darCartas());
+            }
+        }
         // TODO: aqui estará toda a lógica do jogo. 
-        // 1. Deverá aguarda a ação do jogadorX e tratar a jogada deste. 
+        // 1. Deverá aguarda a ação do jogadorX e tratar a jogada deste.
+
         // 2. Aguardar para que o jogadorX+1 jogue para tratar sua jogada e 
         //   determinar se termina a rodada ou não.
         // 3. Caso a rodada não tenha terminado, volta para o passo 1; Caso a 
