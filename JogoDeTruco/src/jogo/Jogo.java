@@ -13,61 +13,105 @@ import java.util.Random;
  */
 public class Jogo {
 
-    private Jogada jogada;
-    private Mao mao;
     private static final Carta[] CARTAS = Carta.values();
 
-    public Jogo(Jogada jogada, Mao mao) {
-        this.jogada = jogada;
-        this.mao = mao;
-    }
-
-    public Jogo() {
-    }
-
-    public void queroTruco() {
+    public static void queroTruco(Mao mao) {
         mao.setTentos(2);
-
     }
 
-    public void naoQueroTruco() {
+    public static void naoQueroTruco(Mao mao) {
         mao.setTentos(mao.getTentos() - 1);
     }
 
-    public void retruco() {
+    public static void retruco(Mao mao) {
         mao.setTentos(3);
     }
 
-    public void naoQueroRetruco() {
+    public static void naoQueroRetruco(Mao mao) {
         mao.setTentos(mao.getTentos() - 2);
     }
 
-    public void valeQuatro() {
+    public static void valeQuatro(Mao mao) {
         mao.setTentos(4);
     }
 
-    public void fugirValeQuatro() {
+    public static void fugirValeQuatro(Mao mao) {
         mao.setTentos(mao.getTentos() - 3);
     }
 
-    public Carta[] darCartas() {
+    public static void aceitarEnvido(Jogador jogador) {
+        jogador.setTentos(jogador.getTentos() + 2);
+    }
+
+    public static void fugirEnvido(Jogador jogador) {
+        jogador.setTentos(jogador.getTentos() - 1);
+    }
+
+    public static void aceitaRealEnvido(Jogador jogador) {
+        jogador.setTentos(jogador.getTentos() + 5);
+    }
+
+    public static void fugirRealEnvido(Jogador jogador) {
+        jogador.setTentos(jogador.getTentos() - 1);
+    }
+
+    public static void fugirFaltaEnvido(Jogador jogador) {
+        jogador.setTentos(jogador.getTentos() - 1);
+    }
+
+    public static void fugirFaltaRealEnvido(Jogador jogador) {
+        jogador.setTentos(jogador.getTentos() - 5);
+    }
+
+    public static Carta[] darCartas() {
         Carta[] cartas = new Carta[3];
         for (int i = 0; i < cartas.length; i++) {
-            cartas[i] = this.encontrarCarta(this.randomNaipe(), this.randomRanking());
+            cartas[i] = encontrarCarta(randomNaipe(), randomRanking());
         }
         return cartas;
     }
 
-    private Carta encontrarCarta(Naipe naipe, Integer ranking) {
+    public static Boolean podePedirEnvido(Rodada rodada) {
+        return rodada.getJogadas().isEmpty();
+    }
+
+    public static Boolean isCartaDoMesmoNaipe(Jogador jogador) {
+        for (Carta carta : jogador.getCartas()) {
+            if (carta == null) {
+                return false;
+            }
+        }
+        return jogador.getCartas()[0].getNaipe().equals(jogador.getCartas()[1].getNaipe()) && jogador.getCartas()[0].getNaipe().equals(jogador.getCartas()[2].getNaipe());
+    }
+
+    public static Boolean isVencedorPorFlor(Partida partida) {
+        return !Jogo.isCartaDoMesmoNaipe(partida.getJogadores().get(0)) && Jogo.isCartaDoMesmoNaipe(partida.getJogadores().get(1));
+    }
+
+    public static void contraFlor(Partida partida) {
+        for (int i = 0; i < partida.getJogadores().size(); i++) {
+            partida.getJogadores().get(i).setTentos(0);
+        }
+    }
+
+    public static void vencedorContraFlor(Jogador jogador) {
+        jogador.setTentos(6);
+    }
+
+    public static void fugirFlor(Jogador jogador) {
+        jogador.setTentos(-4);
+    }
+
+    private static Carta encontrarCarta(Naipe naipe, Integer ranking) {
         for (Carta CARTAS1 : CARTAS) {
-            if (CARTAS1.getNaipe() == this.randomNaipe() && CARTAS1.getRanking() == ranking) {
+            if (CARTAS1.getNaipe() == randomNaipe() && CARTAS1.getRanking() == ranking) {
                 return CARTAS1;
             }
         }
         return null;
     }
 
-    private Naipe randomNaipe() {
+    private static Naipe randomNaipe() {
         Random random = new Random();
         int numero = random.nextInt(4);
         switch (numero) {
@@ -83,7 +127,7 @@ public class Jogo {
         return null;
     }
 
-    private Integer randomRanking() {
+    private static Integer randomRanking() {
         return new Random().nextInt(15) + 1;
     }
 
