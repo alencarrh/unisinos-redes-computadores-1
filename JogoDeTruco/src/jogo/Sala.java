@@ -17,6 +17,13 @@ public class Sala implements Serializable {
     private final String nome;
     private final Partida partida;
 
+    public Sala(Long idSala) {
+        this.idSala = idSala;
+        this.partida = null;
+        this.nome = null;
+    }
+
+    
     public Sala(Long idSala, String nome, Jogador primeiroJogador) {
         this.idSala = idSala;
         this.nome = nome;

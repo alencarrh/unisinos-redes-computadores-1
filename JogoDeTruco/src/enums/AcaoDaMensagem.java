@@ -14,6 +14,7 @@ public enum AcaoDaMensagem {
     ENTRAR_NA_PARTIDA,
     SAIR_DA_PARTIDA,
     MOSTRAR_RESULTADO_FINAL,
-    JOGADA
+    JOGADA,
+    TEXTO
 
 }

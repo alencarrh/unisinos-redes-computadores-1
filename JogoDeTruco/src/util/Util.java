@@ -32,7 +32,7 @@ public class Util {
      * @param aEnd
      * @param aRandom
      */
-    private static int showRandomInteger(int aStart, int aEnd) {
+    public static int showRandomInteger(int aStart, int aEnd) {
         if (aStart > aEnd) {
             throw new IllegalArgumentException("Start cannot exceed End.");
         }

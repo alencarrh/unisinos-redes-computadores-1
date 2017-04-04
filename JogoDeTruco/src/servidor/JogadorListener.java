@@ -68,19 +68,12 @@ public class JogadorListener extends Thread implements Serializable {
                 //TODO: criar uma nova sala/partida
                 criarNovaPartida();
                 break;
-            case SAIR_DA_PARTIDA:
-                //TODO: sair da partida // veriricar se será realmente implementado
-                break;
+//            case SAIR_DA_PARTIDA:
+//                //TODO: sair da partida // veriricar se será realmente implementado
+//                break;
             case ENTRAR_NA_PARTIDA:
                 //TODO: adicionar o usuário a partida que ele selecionou
                 adicionarJogadorNaPartida(msg);
-                break;
-            case JOGADA:
-                //TODO: fazer a jogada do jogador//verificar se será tratado aqui
-                realizarJogada((MensagemJogada) msg);
-                break;
-            case MOSTRAR_RESULTADO_FINAL:
-                //TODO: verificar se estará neste local. Deve retornar o placar final da partida.
                 break;
             case JOGADOR_CRIADO:
                 //TODO: atualizar informações do jogador
@@ -134,7 +127,9 @@ public class JogadorListener extends Thread implements Serializable {
 
     private void criarNovaPartida() {
         Sala novaSala = new Sala(getNextSalaId(), this.jogador.getNomeJogador(), jogador);
+        this.salaDesteJogador = novaSala;
         SALAS.add(novaSala);
+        super.interrupt();//vai interromper esta thread pois agora quer irá ouvir e tratar as mensagem do jogador é a partida
     }
 
     private Long getNextSalaId() {
@@ -143,9 +138,11 @@ public class JogadorListener extends Thread implements Serializable {
 
     private void adicionarJogadorNaPartida(Mensagem msgTemp) {
         MensagemEntrarEmPartida msg = (MensagemEntrarEmPartida) msgTemp;
-        this.salaDesteJogador = SALAS.get(new Integer(msg.getIdSala()) - 1);
+        this.salaDesteJogador = SALAS.get(SALAS.indexOf(new Sala(new Long(msg.getIdSala()))));
         if (StatusDaPartida.AGUARDANDO_JOGADOR.equals(this.salaDesteJogador.getStatus())) {
+            SALAS.remove(this.salaDesteJogador);
             this.salaDesteJogador.addJogador(jogador);
+            super.interrupt();//vai interromper esta thread pois agora quer irá ouvir e tratar as mensagem do jogador é a partida
         }
     }
 

@@ -5,6 +5,7 @@ import comunicacao.Mensagem;
 import comunicacao.MensagemEntrarEmPartida;
 import comunicacao.MensagemJogador;
 import comunicacao.MensagemOpcoes;
+import comunicacao.MensagemTexto;
 import comunicacao.Opcao;
 import enums.AcaoDaMensagem;
 import enums.DirecaoDaMensagem;
@@ -60,7 +61,7 @@ public class ClienteMain {
                     Mensagem fromServer = conexao.receber();
                     System.out.println(fromServer);
                     switch (fromServer.getAcaoDaMensagem()) {
-                        
+
                     }
                 } catch (IOException | ClassNotFoundException ex) {
                     Logger.getLogger(ClienteMain.class.getName()).log(Level.SEVERE, null, ex);
@@ -106,6 +107,9 @@ public class ClienteMain {
             case JOGADA:
                 //realizar jogada
                 break;
+            case TEXTO:
+                System.out.println(((MensagemTexto) msg).getTexto());
+                break;
         }
     }
 
@@ -126,7 +130,7 @@ public class ClienteMain {
             System.out.println("Sala criada com sucesso!");
             System.out.println("No aguardo de outro jogador para iniciar a partida...\n");
         } else {
-            System.out.println("Entrando nada sala do jogador " + mensagemOpcoes.getOpcoes().get(new Integer(inputUsuario)-1).labelOpcao);
+            System.out.println("Entrando nada sala do jogador " + mensagemOpcoes.getOpcoes().get(new Integer(inputUsuario) - 1).labelOpcao);
             msg = new MensagemEntrarEmPartida(DirecaoDaMensagem.PARA_SERVIDOR, AcaoDaMensagem.ENTRAR_NA_PARTIDA, inputUsuario);
         }
         conexao.enviar(msg);
