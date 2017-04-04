@@ -2,6 +2,7 @@ package servidor;
 
 import comunicacao.Mensagem;
 import comunicacao.MensagemEntrarEmPartida;
+import comunicacao.MensagemJogada;
 import comunicacao.MensagemJogador;
 import comunicacao.MensagemOpcoes;
 import comunicacao.Opcao;
@@ -29,6 +30,7 @@ public class JogadorListener extends Thread implements Serializable {
 
     private static Long idsSalas = new Long(1);
     private static final List<Sala> SALAS = new ArrayList<>();
+    private Sala salaDesteJogador;
     private final Jogador jogador;
 
     public JogadorListener(Jogador jogador) {
@@ -40,16 +42,20 @@ public class JogadorListener extends Thread implements Serializable {
      */
     @Override
     public void run() {
-        enviarInformacoesDeUsuario();
-
-        while (this.jogador.getConexao().isConectionOpen()) {
-            Mensagem msg = this.jogador.getConexao().receber();
-            System.out.println("Servidor recebeu(#" + jogador.getNomeJogador() + "): " + msg);
-            tratarMensagem(msg);
+        try {
+            enviarInformacoesDeUsuario();
+            while (this.jogador.getConexao().isConectionOpen()) {
+                Mensagem msg = this.jogador.getConexao().receber();
+                System.out.println("Servidor recebeu(#" + jogador.getNomeJogador() + "): " + msg);
+                tratarMensagem(msg);
+            }
+        } catch (IOException | ClassNotFoundException ex) {
+            SALAS.remove(this.salaDesteJogador);
+            Logger.getLogger(JogadorListener.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    private void tratarMensagem(Mensagem msg) {
+    private void tratarMensagem(Mensagem msg) throws IOException {
         switch (msg.getAcaoDaMensagem()) {
             case FINALIZAR_CONEXAO:
                 //TODO: finalizar esta conexão
@@ -58,7 +64,7 @@ public class JogadorListener extends Thread implements Serializable {
                 //TODO: enviar mensagem para usuário com lista de salas disponiveis
                 retornarSalasDisponiveis();
                 break;
-            case CRIAR__NOVA_PARTIDA:
+            case CRIAR_NOVA_PARTIDA:
                 //TODO: criar uma nova sala/partida
                 criarNovaPartida();
                 break;
@@ -71,6 +77,7 @@ public class JogadorListener extends Thread implements Serializable {
                 break;
             case JOGADA:
                 //TODO: fazer a jogada do jogador//verificar se será tratado aqui
+                realizarJogada((MensagemJogada) msg);
                 break;
             case MOSTRAR_RESULTADO_FINAL:
                 //TODO: verificar se estará neste local. Deve retornar o placar final da partida.
@@ -112,7 +119,7 @@ public class JogadorListener extends Thread implements Serializable {
         return Objects.equals(this.jogador, other.jogador);
     }
 
-    private void retornarSalasDisponiveis() {
+    private void retornarSalasDisponiveis() throws IOException {
         MensagemOpcoes msg = new MensagemOpcoes(DirecaoDaMensagem.PARA_CLIENTE, AcaoDaMensagem.LISTA_PARTIDAS_DISPONIVEIS, "Opção: ");
         SALAS.stream().filter((sala) -> (StatusDaPartida.AGUARDANDO_JOGADOR.equals(sala.getStatus()))).forEachOrdered((sala) -> {
             msg.addOpcao(new Opcao(sala.getIdSala().toString(), sala.getJogagores().get(0).getNomeJogador()));
@@ -136,16 +143,20 @@ public class JogadorListener extends Thread implements Serializable {
 
     private void adicionarJogadorNaPartida(Mensagem msgTemp) {
         MensagemEntrarEmPartida msg = (MensagemEntrarEmPartida) msgTemp;
-        Sala sala = SALAS.get(new Integer(msg.getIdSala()) - 1);
-        if (StatusDaPartida.AGUARDANDO_JOGADOR.equals(sala.getStatus())) {
-            sala.addJogador(jogador);
+        this.salaDesteJogador = SALAS.get(new Integer(msg.getIdSala()) - 1);
+        if (StatusDaPartida.AGUARDANDO_JOGADOR.equals(this.salaDesteJogador.getStatus())) {
+            this.salaDesteJogador.addJogador(jogador);
         }
     }
 
-    private void enviarInformacoesDeUsuario() {
+    private void enviarInformacoesDeUsuario() throws IOException {
         Mensagem msg = new MensagemJogador(DirecaoDaMensagem.PARA_CLIENTE, AcaoDaMensagem.JOGADOR_CRIADO, this.jogador);
         System.out.println("Servidor enviando(#" + this.jogador.getNomeJogador() + "): " + msg);
         this.jogador.getConexao().enviar(msg);
+    }
+
+    private void realizarJogada(MensagemJogada mensagemJogada) {
+//        this.salaDesteJogador.jogar(mensagemJogada);
     }
 
 }

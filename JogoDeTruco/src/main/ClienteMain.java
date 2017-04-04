@@ -11,6 +11,8 @@ import enums.DirecaoDaMensagem;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jogo.Jogador;
 
 /**
@@ -54,10 +56,14 @@ public class ClienteMain {
     private static Thread createListener() {
         Thread listener = new Thread(() -> {
             while (conexao.isConectionOpen()) {
-                Mensagem fromServer = conexao.receber();
-                System.out.println(fromServer);
-                switch (fromServer.getAcaoDaMensagem()) {
-
+                try {
+                    Mensagem fromServer = conexao.receber();
+                    System.out.println(fromServer);
+                    switch (fromServer.getAcaoDaMensagem()) {
+                        
+                    }
+                } catch (IOException | ClassNotFoundException ex) {
+                    Logger.getLogger(ClienteMain.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         });
@@ -103,7 +109,7 @@ public class ClienteMain {
         }
     }
 
-    private static void solicitaSalasDisponiveis() {
+    private static void solicitaSalasDisponiveis() throws IOException {
         conexao.enviar(new Mensagem(DirecaoDaMensagem.PARA_SERVIDOR, AcaoDaMensagem.LISTA_PARTIDAS_DISPONIVEIS));
     }
 
@@ -116,7 +122,8 @@ public class ClienteMain {
         String inputUsuario = KEYBOARD_INPUT.readLine();
         Mensagem msg;
         if (inputUsuario.equals("0")) {
-            msg = new Mensagem(DirecaoDaMensagem.PARA_SERVIDOR, AcaoDaMensagem.CRIAR__NOVA_PARTIDA);
+            msg = new Mensagem(DirecaoDaMensagem.PARA_SERVIDOR, AcaoDaMensagem.CRIAR_NOVA_PARTIDA);
+            System.out.println("Sala criada com sucesso!");
             System.out.println("No aguardo de outro jogador para iniciar a partida...\n");
         } else {
             System.out.println("Entrando nada sala do jogador " + mensagemOpcoes.getOpcoes().get(new Integer(inputUsuario)-1).labelOpcao);

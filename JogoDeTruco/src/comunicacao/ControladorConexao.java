@@ -55,15 +55,10 @@ public class ControladorConexao implements Serializable {
      * @return <i>true</i> se a mensagem foi enviada com sucesso. <i>false</i>
      * caso houve algum problema no envio.
      */
-    public boolean enviar(Mensagem msg) {
-        try {
-            if (isConectionOpen()) {
-                output.writeObject(msg);
-                output.flush();
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(ControladorConexao.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
+    public boolean enviar(Mensagem msg) throws IOException {
+        if (isConectionOpen()) {
+            output.writeObject(msg);
+            output.flush();
         }
         return true;
     }
@@ -73,16 +68,12 @@ public class ControladorConexao implements Serializable {
      *
      * @return <i>mensagem</i> do servidor.
      */
-    public Mensagem receber() {
-        try {
-            if (isConectionOpen()) {
-                return (Mensagem) input.readObject();
-            }
-            return new Mensagem(this.direcaoDaMensagem, AcaoDaMensagem.FINALIZAR_CONEXAO);
-        } catch (IOException | ClassNotFoundException ex) {
-            Logger.getLogger(ControladorConexao.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
+    public Mensagem receber() throws IOException, ClassNotFoundException {
+        if (isConectionOpen()) {
+            return (Mensagem) input.readObject();
         }
+        return new Mensagem(this.direcaoDaMensagem, AcaoDaMensagem.FINALIZAR_CONEXAO);
+
     }
 
     /**

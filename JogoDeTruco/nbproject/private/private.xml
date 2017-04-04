@@ -3,10 +3,17 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Gabriel%20da%20Rosa/Documents/5ºsemestre/RedesI/git/RedesComputadoresI/JogoDeTruco/src/enums/AcaoDaJogada.java</file>
-            <file>file:/C:/Users/Gabriel%20da%20Rosa/Documents/5ºsemestre/RedesI/git/RedesComputadoresI/JogoDeTruco/src/jogo/Jogo.java</file>
-            <file>file:/C:/Users/Gabriel%20da%20Rosa/Documents/5ºsemestre/RedesI/git/RedesComputadoresI/JogoDeTruco/src/jogo/Mao.java</file>
-            <file>file:/C:/Users/Gabriel%20da%20Rosa/Documents/5ºsemestre/RedesI/git/RedesComputadoresI/JogoDeTruco/src/jogo/Jogada.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/jogo/Sala.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/comunicacao/ControladorConexao.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/jogo/Jogador.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/servidor/JogadorListener.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/comunicacao/MensagemJogada.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/main/ClienteMain.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/main/ServidorMain.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/util/Util.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/jogo/Partida.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/enums/Carta.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/jogo/Jogo.java</file>
         </group>
     </open-files>
 </project-private>
