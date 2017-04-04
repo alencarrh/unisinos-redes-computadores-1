@@ -1,10 +1,7 @@
 package jogo;
 
-import enums.AcaoDaJogada;
 import enums.Carta;
 import enums.Naipe;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Random;
 
 /**
@@ -66,7 +63,7 @@ public class Jogo {
     public static Carta[] darCartas() {
         Carta[] cartas = new Carta[3];
         for (int i = 0; i < cartas.length; i++) {
-            cartas[i] = encontrarCarta(randomNaipe(), randomRanking());
+            cartas[i] = gerarCartaAleatoria();
         }
         return cartas;
     }
@@ -75,7 +72,7 @@ public class Jogo {
         return rodada.getJogadas().isEmpty();
     }
 
-    public static Boolean isCartaDoMesmoNaipe(Jogador jogador) {
+    public static Boolean possuiFlor(Jogador jogador) {
         for (Carta carta : jogador.getCartas()) {
             if (carta == null) {
                 return false;
@@ -85,7 +82,7 @@ public class Jogo {
     }
 
     public static Boolean isVencedorPorFlor(Partida partida) {
-        return !Jogo.isCartaDoMesmoNaipe(partida.getJogadores().get(0)) && Jogo.isCartaDoMesmoNaipe(partida.getJogadores().get(1));
+        return !Jogo.possuiFlor(partida.getJogadores().get(0)) && Jogo.possuiFlor(partida.getJogadores().get(1));
     }
 
     public static void contraFlor(Partida partida) {
@@ -101,34 +98,37 @@ public class Jogo {
     public static void fugirFlor(Jogador jogador) {
         jogador.setTentos(-4);
     }
-
-    private static Carta encontrarCarta(Naipe naipe, Integer ranking) {
-        for (Carta CARTAS1 : CARTAS) {
-            if (CARTAS1.getNaipe() == randomNaipe() && CARTAS1.getRanking() == ranking) {
-                return CARTAS1;
+    
+    public static void validacaoEnvido(Jogador jogador1, Jogador jogador2){
+        Cartas[] cartas = jogador1.getCartas();
+    }
+    
+    private static void validacaoEnvido(Carta[] cartas){
+        if(cartas.length != 3){
+            new Exception();
+        }
+        Integer maior= cartas[0].getRanking();
+        Boolean temDoMesmoNaipe = false;
+        for (int i = 1; i < cartas.length; i++) {
+            if(cartas[i].getRanking()>maior){
+                maior = cartas[i].getRanking();
             }
         }
-        return null;
-    }
-
-    private static Naipe randomNaipe() {
-        Random random = new Random();
-        int numero = random.nextInt(4);
-        switch (numero) {
-            case 0:
-                return Naipe.COPAS;
-            case 1:
-                return Naipe.ESPADA;
-            case 2:
-                return Naipe.OURO;
-            case 3:
-                return Naipe.PAUS;
+        if(cartas.length >= 2){
+            cartas[0].getNaipe().equals(cartas[1].)
         }
-        return null;
+    }
+    
+    private static boolean isMesmoNaipe(Carta carta1, Carta carta2){
+        return carta1.getNaipe().equals(carta2.getNaipe());
     }
 
-    private static Integer randomRanking() {
-        return new Random().nextInt(15) + 1;
+    private static Carta gerarCartaAleatoria() {
+        return CARTAS[geraNumeroParaCarta()];
+    }
+
+    private static Integer geraNumeroParaCarta() {
+        return new Random().nextInt(CARTAS.length);
     }
 
 }
