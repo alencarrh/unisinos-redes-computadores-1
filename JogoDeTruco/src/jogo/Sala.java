@@ -3,6 +3,7 @@ package jogo;
 import enums.StatusDaPartida;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @class Sala
@@ -16,6 +17,13 @@ public class Sala implements Serializable {
     private final String nome;
     private final Partida partida;
 
+    public Sala(Long idSala) {
+        this.idSala = idSala;
+        this.partida = null;
+        this.nome = null;
+    }
+
+    
     public Sala(Long idSala, String nome, Jogador primeiroJogador) {
         this.idSala = idSala;
         this.nome = nome;
@@ -53,6 +61,27 @@ public class Sala implements Serializable {
 
     public String getNome() {
         return nome;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Sala other = (Sala) obj;
+        return Objects.equals(this.idSala, other.idSala);
     }
 
 }
