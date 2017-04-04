@@ -1,5 +1,6 @@
 package jogo;
 
+import enums.EstadoDaMao;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,27 +16,23 @@ import java.util.List;
 public class Mao implements Serializable {
 
     private final List<Rodada> rodadas;
-    private int tentos;
+    private EstadoDaMao estadoDaMao;
 
     public Mao() {
-        rodadas = new ArrayList<>();
-        tentos = 1;
-    }
-
-    public int getTentos() {
-        return tentos;
-    }
-
-    public void aumentarTentosDaMao(int tentosAAumentar) {
-        this.tentos += tentosAAumentar;
+        this.rodadas = new ArrayList<>();
+        this.estadoDaMao = EstadoDaMao.SIMPLES;
     }
 
     public List<Rodada> getRodadas() {
         return rodadas;
     }
 
-    public void setTentos(int tentos) {
-        this.tentos = tentos;
+    public EstadoDaMao getEstadoDaMao() {
+        return estadoDaMao;
+    }
+
+    public void setEstadoDaMao(EstadoDaMao estadoDaMao) {
+        this.estadoDaMao = estadoDaMao;
     }
 
 }

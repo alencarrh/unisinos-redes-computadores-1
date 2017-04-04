@@ -3,6 +3,7 @@ package jogo;
 import comunicacao.ControladorConexao;
 import enums.Carta;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -16,7 +17,7 @@ public class Jogador extends Thread implements Serializable {
     private final ControladorConexao conexao;
     private String nomeJogador;
     private int tentos;
-    private Carta[] cartas;
+    private List<Carta> cartas;
 
     public Jogador(Long idPlayer, String nome, ControladorConexao conexao) {
         this.idJogador = idPlayer;
@@ -34,11 +35,11 @@ public class Jogador extends Thread implements Serializable {
         return idJogador;
     }
 
-    public Carta[] getCartas() {
+    public List<Carta> getCartas() {
         return cartas;
     }
 
-    public void setCartas(Carta[] cartas) {
+    public void setCartas(List<Carta> cartas) {
         this.cartas = cartas;
     }
 
