@@ -91,8 +91,8 @@ public class Partida extends Thread {
 
     private void enviarCartas(Jogador jogador) throws IOException {
         Mensagem mensagemOpcoes = new MensagemOpcoes(DirecaoDaMensagem.PARA_CLIENTE, AcaoDaMensagem.MOSTRAR_CARTAS);
-        for (int i = 0; i < jogador.getCartas().length; i++) {
-            ((MensagemOpcoes) mensagemOpcoes).addOpcao(new Opcao(String.valueOf(i), jogador.getCartas()[i].getLabel()));
+        for (int i = 0; i < jogador.getCartas().size(); i++) {
+            ((MensagemOpcoes) mensagemOpcoes).addOpcao(new Opcao(String.valueOf(i), jogador.getCartas().get(i).getLabel()));
         }
         jogador.getConexao().enviar(mensagemOpcoes);
     }
