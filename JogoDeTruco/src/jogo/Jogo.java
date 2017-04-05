@@ -1,7 +1,9 @@
 package jogo;
 
 import enums.Carta;
-import enums.Naipe;
+import enums.EstadoDaMao;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -12,115 +14,53 @@ public class Jogo {
 
     private static final Carta[] CARTAS = Carta.values();
 
-    public static void queroTruco(Mao mao) {
-        mao.setTentos(2);
+    public static void aceitouTruco(Mao mao) {
+        mao.setEstadoDaMao(EstadoDaMao.TRUCO);
     }
 
-    public static void naoQueroTruco(Mao mao) {
-        mao.setTentos(mao.getTentos() - 1);
+    public static void aceitouRetruco(Mao mao) {
+        mao.setEstadoDaMao(EstadoDaMao.RETRUCO);
     }
 
-    public static void retruco(Mao mao) {
-        mao.setTentos(3);
+    public static void aceitouValeQuatro(Mao mao) {
+        mao.setEstadoDaMao(EstadoDaMao.VALE_QUATRO);
     }
 
-    public static void naoQueroRetruco(Mao mao) {
-        mao.setTentos(mao.getTentos() - 2);
+    public static boolean podeChamarTruco(Mao mao) {
+        return EstadoDaMao.SIMPLES.equals(mao.getEstadoDaMao());
     }
 
-    public static void valeQuatro(Mao mao) {
-        mao.setTentos(4);
+    public static boolean podeChamarRetruco(Mao mao) {
+        return EstadoDaMao.TRUCO.equals(mao.getEstadoDaMao());
     }
 
-    public static void fugirValeQuatro(Mao mao) {
-        mao.setTentos(mao.getTentos() - 3);
+    public static boolean podeChamarValeQuatro(Mao mao) {
+        return EstadoDaMao.RETRUCO.equals(mao.getEstadoDaMao());
     }
 
-    public static void aceitarEnvido(Jogador jogador) {
-        jogador.setTentos(jogador.getTentos() + 2);
+    public static boolean podeChamarEnvido(Jogador jogador) {
+        return jogador.getCartas().size() == 3;
     }
 
-    public static void fugirEnvido(Jogador jogador) {
-        jogador.setTentos(jogador.getTentos() - 1);
-    }
-
-    public static void aceitaRealEnvido(Jogador jogador) {
-        jogador.setTentos(jogador.getTentos() + 5);
-    }
-
-    public static void fugirRealEnvido(Jogador jogador) {
-        jogador.setTentos(jogador.getTentos() - 1);
-    }
-
-    public static void fugirFaltaEnvido(Jogador jogador) {
-        jogador.setTentos(jogador.getTentos() - 1);
-    }
-
-    public static void fugirFaltaRealEnvido(Jogador jogador) {
-        jogador.setTentos(jogador.getTentos() - 5);
-    }
-
-    public static Carta[] darCartas() {
-        Carta[] cartas = new Carta[3];
-        for (int i = 0; i < cartas.length; i++) {
-            cartas[i] = gerarCartaAleatoria();
+    public static boolean podeChamarFlor(Jogador jogador) {
+        if (podeChamarEnvido(jogador)) {
+            List<Carta> cartas = jogador.getCartas();
+            //Carta1 == Carta2 && Carta1 == Carta3
+            return (cartas.get(0).isMesmoNaipe(cartas.get(1))) && (cartas.get(0).isMesmoNaipe(cartas.get(2)));
         }
+        return false;
+    }
+
+    public static boolean podeChamarContraFlor(Jogador jogador) {
+        return podeChamarFlor(jogador);
+    }
+
+    public static List<Carta> darCartas() {
+        List<Carta> cartas = new ArrayList<>();
+        cartas.add(gerarCartaAleatoria());
+        cartas.add(gerarCartaAleatoria());
+        cartas.add(gerarCartaAleatoria());
         return cartas;
-    }
-
-    public static Boolean podePedirEnvido(Rodada rodada) {
-        return rodada.getJogadas().isEmpty();
-    }
-
-    public static Boolean possuiFlor(Jogador jogador) {
-        for (Carta carta : jogador.getCartas()) {
-            if (carta == null) {
-                return false;
-            }
-        }
-        return jogador.getCartas()[0].getNaipe().equals(jogador.getCartas()[1].getNaipe()) && jogador.getCartas()[0].getNaipe().equals(jogador.getCartas()[2].getNaipe());
-    }
-
-    public static Boolean isVencedorPorFlor(Partida partida) {
-        return !Jogo.possuiFlor(partida.getJogadores().get(0)) && Jogo.possuiFlor(partida.getJogadores().get(1));
-    }
-
-    public static void contraFlor(Partida partida) {
-        for (int i = 0; i < partida.getJogadores().size(); i++) {
-            partida.getJogadores().get(i).setTentos(0);
-        }
-    }
-
-    public static void vencedorContraFlor(Jogador jogador) {
-        jogador.setTentos(6);
-    }
-
-    public static void fugirFlor(Jogador jogador) {
-        jogador.setTentos(-4);
-    }
-    
-//    public static void validacaoEnvido(Jogador jogador1, Jogador jogador2){
-//        Cartas[] cartas = jogador1.getCartas();
-//    }
-    
-    private static void validacaoEnvido(Carta[] cartas){
-        if(cartas.length != 3){
-            new Exception();
-        }
-        Integer maior= cartas[0].getRanking();
-        Boolean temDoMesmoNaipe = false;
-        for (int i = 1; i < cartas.length; i++) {
-            if(cartas[i].getRanking()>maior){
-                maior = cartas[i].getRanking();
-            }
-        }
-//        if(cartas.length >= 2){
-//            cartas[0].getNaipe().equals(cartas[1].)
-//        }
-    }
-    
-    private static boolean isMesmoNaipe(Carta carta1, Carta carta2){
-        return carta1.getNaipe().equals(carta2.getNaipe());
     }
 
     private static Carta gerarCartaAleatoria() {
