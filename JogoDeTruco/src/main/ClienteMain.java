@@ -110,6 +110,10 @@ public class ClienteMain {
             case TEXTO:
                 System.out.println(((MensagemTexto) msg).getTexto());
                 break;
+            case MOSTRAR_CARTAS:
+                mostrarCartas((MensagemOpcoes)msg);
+                break;
+                
         }
     }
 
@@ -134,5 +138,14 @@ public class ClienteMain {
             msg = new MensagemEntrarEmPartida(DirecaoDaMensagem.PARA_SERVIDOR, AcaoDaMensagem.ENTRAR_NA_PARTIDA, inputUsuario);
         }
         conexao.enviar(msg);
+    }
+
+    private static void mostrarCartas(MensagemOpcoes mensagemOpcoes) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Suas Cartas: ");
+        mensagemOpcoes.getOpcoes().stream().forEach((opcoa) -> {
+            sb.append(opcoa.getLabelOpcao()).append(" ");
+        });
+        System.out.println(sb.toString());
     }
 }

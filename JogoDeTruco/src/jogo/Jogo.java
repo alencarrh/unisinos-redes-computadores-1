@@ -99,9 +99,9 @@ public class Jogo {
         jogador.setTentos(-4);
     }
     
-    public static void validacaoEnvido(Jogador jogador1, Jogador jogador2){
-        Cartas[] cartas = jogador1.getCartas();
-    }
+//    public static void validacaoEnvido(Jogador jogador1, Jogador jogador2){
+//        Cartas[] cartas = jogador1.getCartas();
+//    }
     
     private static void validacaoEnvido(Carta[] cartas){
         if(cartas.length != 3){
@@ -114,9 +114,9 @@ public class Jogo {
                 maior = cartas[i].getRanking();
             }
         }
-        if(cartas.length >= 2){
-            cartas[0].getNaipe().equals(cartas[1].)
-        }
+//        if(cartas.length >= 2){
+//            cartas[0].getNaipe().equals(cartas[1].)
+//        }
     }
     
     private static boolean isMesmoNaipe(Carta carta1, Carta carta2){

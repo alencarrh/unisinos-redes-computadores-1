@@ -1,8 +1,12 @@
 package jogo;
 
 import comunicacao.Mensagem;
+import comunicacao.MensagemOpcoes;
 import comunicacao.MensagemTexto;
+import comunicacao.Opcao;
+import enums.AcaoDaJogada;
 import enums.AcaoDaMensagem;
+import enums.Carta;
 import enums.DirecaoDaMensagem;
 import enums.StatusDaPartida;
 import java.io.IOException;
@@ -52,6 +56,7 @@ public class Partida extends Thread {
         jogadores.forEach((jogador) -> {
             try {
                 jogador.getConexao().enviar(new MensagemTexto("Partida está sendo iniciada!", DirecaoDaMensagem.PARA_CLIENTE, AcaoDaMensagem.TEXTO));
+                jogador.setCartas(Jogo.darCartas());
             } catch (IOException ex) {
                 Logger.getLogger(Partida.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -60,16 +65,11 @@ public class Partida extends Thread {
         Mensagem msg;
         while (this.jogadores.get(0).getConexao().isConectionOpen() && this.jogadores.get(1).getConexao().isConectionOpen()) {
             try {
-                //Jogada do jogador 1
-                msg = this.jogadores.get(0).getConexao().receber();
-                System.out.println("Partida recebeu(#" + this.jogadores.get(0).getNomeJogador() + "): " + msg);
-                this.jogadores.get(1).getConexao().enviar(msg);
-
-                //Jogada do jogador 2
-                msg = this.jogadores.get(1).getConexao().receber();
-                System.out.println("Partida recebeu(#" + this.jogadores.get(1).getNomeJogador() + "): " + msg);
-                this.jogadores.get(0).getConexao().enviar(msg);
-
+//                if(){
+                this.enviarCartas(jogadores.get(0));
+                this.enviarCartas(jogadores.get(1));
+                this.jogadores.get(0).getConexao().receber();
+//                }
             } catch (IOException | ClassNotFoundException ex) {
                 Logger.getLogger(Partida.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -87,6 +87,14 @@ public class Partida extends Thread {
         // 5. Se a rodada terminou, sorteia as cartas iniciando nova rodada e 
         //   vai para etapa 1.
         //
+    }
+
+    private void enviarCartas(Jogador jogador) throws IOException {
+        Mensagem mensagemOpcoes = new MensagemOpcoes(DirecaoDaMensagem.PARA_CLIENTE, AcaoDaMensagem.MOSTRAR_CARTAS);
+        for (int i = 0; i < jogador.getCartas().length; i++) {
+            ((MensagemOpcoes) mensagemOpcoes).addOpcao(new Opcao(String.valueOf(i), jogador.getCartas()[i].getLabel()));
+        }
+        jogador.getConexao().enviar(mensagemOpcoes);
     }
 
 }

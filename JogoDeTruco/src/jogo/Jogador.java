@@ -17,12 +17,14 @@ public class Jogador extends Thread implements Serializable {
     private String nomeJogador;
     private int tentos;
     private Carta[] cartas;
+    private Boolean podeJogar;
 
     public Jogador(Long idPlayer, String nome, ControladorConexao conexao) {
         this.idJogador = idPlayer;
         this.nomeJogador = nome;
         this.conexao = conexao;
         this.tentos = 0;
+        this.podeJogar = false;
     }
 
     @Override
@@ -52,6 +54,14 @@ public class Jogador extends Thread implements Serializable {
 
     public ControladorConexao getConexao() {
         return conexao;
+    }
+
+    public Boolean getPodeJogar() {
+        return podeJogar;
+    }
+
+    public void setPodeJogar(Boolean podeJogar) {
+        this.podeJogar = podeJogar;
     }
 
     public String getNomeJogador() {
