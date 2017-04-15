@@ -30,7 +30,7 @@ public class ServidorMain {
 
         startServer.start();
 
-        System.out.println("Preciona 'Enter' a qualquer momento para parar o servidor...");
+        System.out.println("Pressione 'Enter' a qualquer momento para parar o servidor...");
         KEYBOARD_INPUT.readLine();
 
         server.pararServidor();

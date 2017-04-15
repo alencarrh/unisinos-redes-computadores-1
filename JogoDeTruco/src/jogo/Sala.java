@@ -12,7 +12,6 @@ import java.util.Objects;
  */
 public class Sala implements Serializable {
 
-    private StatusDaPartida status;
     private final Long idSala;
     private final String nome;
     private final Partida partida;
@@ -27,8 +26,7 @@ public class Sala implements Serializable {
     public Sala(Long idSala, String nome, Jogador primeiroJogador) {
         this.idSala = idSala;
         this.nome = nome;
-        this.partida = new Partida(primeiroJogador, status);
-        this.status = StatusDaPartida.AGUARDANDO_JOGADOR;
+        this.partida = new Partida(primeiroJogador);
     }
 
     public List<Jogador> getJogagores() {
@@ -42,17 +40,16 @@ public class Sala implements Serializable {
      * sala já esteje cheia.
      */
     public boolean addJogador(Jogador outroJogador) {
-        if (StatusDaPartida.AGUARDANDO_JOGADOR.equals(this.status)) {
+        if (StatusDaPartida.AGUARDANDO_JOGADOR.equals(this.partida.getStatus())) {
             this.partida.addJogador(outroJogador);
             this.partida.start();
-            this.status = StatusDaPartida.EM_ANDAMENTO;
             return true;
         }
         return false;
     }
 
     public StatusDaPartida getStatus() {
-        return status;
+        return this.partida.getStatus();
     }
 
     public Long getIdSala() {

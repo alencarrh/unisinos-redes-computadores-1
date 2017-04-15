@@ -3,6 +3,7 @@ package jogo;
 import enums.Carta;
 import enums.EstadoDaMao;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -11,8 +12,6 @@ import java.util.Random;
  * @author Gabriel da Rosa
  */
 public class Jogo {
-
-    private static final Carta[] CARTAS = Carta.values();
 
     public static void aceitouTruco(Mao mao) {
         mao.setEstadoDaMao(EstadoDaMao.TRUCO);
@@ -55,20 +54,31 @@ public class Jogo {
         return podeChamarFlor(jogador);
     }
 
-    public static List<Carta> darCartas() {
-        List<Carta> cartas = new ArrayList<>();
-        cartas.add(gerarCartaAleatoria());
-        cartas.add(gerarCartaAleatoria());
-        cartas.add(gerarCartaAleatoria());
-        return cartas;
+    public static void darCartas(Jogador jogador1, Jogador jogador2) {
+        List<Carta> cartasJogador1 = new ArrayList<>();
+        List<Carta> cartasJogador2 = new ArrayList<>();
+        List<Carta> cartasDisponiveis = new ArrayList<>(Arrays.asList(Carta.values()));
+        do {
+            Carta randomCarta = gerarCartaAleatoria(cartasDisponiveis);
+            cartasDisponiveis.remove(randomCarta);
+            if (cartasJogador1.size() == cartasJogador2.size()) {
+                //dar cartas para jogador1
+                cartasJogador1.add(randomCarta);
+            } else {
+                //dar cartas para jogaodor2;
+                cartasJogador2.add(randomCarta);
+            }
+        } while (cartasJogador1.size() < 3 || cartasJogador2.size() < 3);
+        jogador1.setCartas(cartasJogador1);
+        jogador2.setCartas(cartasJogador2);
     }
 
-    private static Carta gerarCartaAleatoria() {
-        return CARTAS[geraNumeroParaCarta()];
+    private static Carta gerarCartaAleatoria(List<Carta> cartas) {
+        return cartas.get(geraNumeroParaCarta(cartas));
     }
 
-    private static Integer geraNumeroParaCarta() {
-        return new Random().nextInt(CARTAS.length);
+    private static Integer geraNumeroParaCarta(List<Carta> cartas) {
+        return new Random().nextInt(cartas.size());
     }
 
 }

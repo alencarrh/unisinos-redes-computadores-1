@@ -61,7 +61,7 @@ public class ClienteMain {
                     Mensagem fromServer = conexao.receber();
                     System.out.println(fromServer);
                     switch (fromServer.getAcaoDaMensagem()) {
-
+                        
                     }
                 } catch (IOException | ClassNotFoundException ex) {
                     Logger.getLogger(ClienteMain.class.getName()).log(Level.SEVERE, null, ex);

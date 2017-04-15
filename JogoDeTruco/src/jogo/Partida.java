@@ -4,9 +4,7 @@ import comunicacao.Mensagem;
 import comunicacao.MensagemOpcoes;
 import comunicacao.MensagemTexto;
 import comunicacao.Opcao;
-import enums.AcaoDaJogada;
 import enums.AcaoDaMensagem;
-import enums.Carta;
 import enums.DirecaoDaMensagem;
 import enums.StatusDaPartida;
 import java.io.IOException;
@@ -25,15 +23,15 @@ import java.util.logging.Logger;
  */
 public class Partida extends Thread {
 
-    private final StatusDaPartida status;
+    private StatusDaPartida status;
     private final List<Jogador> jogadores;
     private final List<Mao> maos;
 
-    public Partida(Jogador primeiroJogador, StatusDaPartida status) {
+    public Partida(Jogador primeiroJogador) {
         this.maos = new ArrayList<>();
         this.jogadores = new ArrayList<>();
         this.jogadores.add(primeiroJogador);
-        this.status = status;
+        this.status = StatusDaPartida.AGUARDANDO_JOGADOR;
     }
 
     public void addJogador(Jogador outroJogador) {
@@ -44,32 +42,30 @@ public class Partida extends Thread {
         return jogadores;
     }
 
+    public StatusDaPartida getStatus() {
+        return status;
+    }
+
     @Override
     public void run() {
-        //PRIMEIRA AÇÃO É DAR AS CARTAS
-//        if (status.equals(status.EM_ANDAMENTO)) {
-//            System.out.println("Distribuindo Cartas...");
-//            for (int i = 0; i < jogadores.size(); i++) {
-//                jogadores.get(i).setCartas(new Jogo().darCartas());
-//            }
-//
+        this.status = StatusDaPartida.EM_ANDAMENTO;
         jogadores.forEach((jogador) -> {
             try {
                 jogador.getConexao().enviar(new MensagemTexto("Partida está sendo iniciada!", DirecaoDaMensagem.PARA_CLIENTE, AcaoDaMensagem.TEXTO));
-                jogador.setCartas(Jogo.darCartas());
             } catch (IOException ex) {
                 Logger.getLogger(Partida.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
-
         Mensagem msg;
-        while (this.jogadores.get(0).getConexao().isConectionOpen() && this.jogadores.get(1).getConexao().isConectionOpen()) {
+        while (this.jogadores.get(0).getConexao().isConectionOpen() && this.jogadores.get(1).getConexao().isConectionOpen() && StatusDaPartida.EM_ANDAMENTO.equals(this.status)) {
             try {
-//                if(){
-                this.enviarCartas(jogadores.get(0));
-                this.enviarCartas(jogadores.get(1));
-                this.jogadores.get(0).getConexao().receber();
-//                }
+                Mao maoAtual = new Mao();
+                if ((maos.size() + 1) % 2 == 0) {//jogador 2 começa
+                    iniciarMao(maoAtual, jogadores.get(1), jogadores.get(0));
+                } else {//jogador 2 começa
+                    iniciarMao(maoAtual, jogadores.get(0), jogadores.get(1));
+                }
+                maos.add(maoAtual);
             } catch (IOException | ClassNotFoundException ex) {
                 Logger.getLogger(Partida.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -95,6 +91,17 @@ public class Partida extends Thread {
             ((MensagemOpcoes) mensagemOpcoes).addOpcao(new Opcao(String.valueOf(i), jogador.getCartas().get(i).getLabel()));
         }
         jogador.getConexao().enviar(mensagemOpcoes);
+    }
+
+    private void iniciarMao(Mao mao, Jogador jogador1, Jogador jogador2) throws IOException, ClassNotFoundException {
+        Jogo.darCartas(jogador1, jogador2);
+        enviarCartas(jogador1);
+        enviarCartas(jogador2);
+
+        while (mao.getJogadorGanhador() == null) {
+            Mensagem msgFromJogador1 = jogador1.getConexao().receber();
+            mao.setJogadorGanhador(jogador1);
+        }
     }
 
 }
