@@ -1,6 +1,8 @@
 package util;
 
+import comunicacao.Mensagem;
 import java.util.Random;
+import jogo.Jogador;
 
 /**
  * @class Util
@@ -53,6 +55,14 @@ public class Util {
 
     public static boolean isNull(Object object) {
         return object == null;
+    }
+
+    public static void printarEnvioInfo(Jogador jogador, Mensagem msg) {
+        System.out.println("Servidor enviando(#" + jogador.getNomeJogador() + "): " + msg);
+    }
+
+    public static void printarRecebimentoInfo(Jogador jogador, Mensagem msg) {
+        System.out.println("Servidor recebeu(#" + jogador.getNomeJogador() + "): " + msg);
     }
 
 }

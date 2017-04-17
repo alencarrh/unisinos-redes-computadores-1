@@ -1,14 +1,16 @@
 package jogo;
 
 import comunicacao.Mensagem;
-import comunicacao.MensagemOpcoes;
-import comunicacao.MensagemTexto;
-import comunicacao.Opcao;
+import comunicacao.transporte.JogadorInfo;
+import comunicacao.transporte.MenuAcoes;
+import comunicacao.transporte.PartidaInfo;
+import enums.AcaoDaJogada;
 import enums.AcaoDaMensagem;
 import enums.StatusDaPartida;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import util.Util;
@@ -31,9 +33,10 @@ public class Partida extends Thread {
     private StatusDaPartida status;
 
     public Partida(Long id, String nome, Jogador primeiroJogador) {
-        if (Util.isNull(id) || Util.isNull(primeiroJogador) || Util.isStringEmpty(nome)) {
-            throw new IllegalArgumentException("Parâmetros inválidos. [Contrutor partida]");
-        }
+        //TODO: verificase se o IF comentado é obrigatório ou não.
+//        if (Util.isNull(id) || Util.isNull(primeiroJogador) || Util.isStringEmpty(nome)) {
+//            throw new IllegalArgumentException("Parâmetros inválidos. [Contrutor classe Partida]");
+//        }
         this.idPartida = id;
         this.nomePartida = nome;
         this.maos = new ArrayList<>();
@@ -42,12 +45,27 @@ public class Partida extends Thread {
         this.status = StatusDaPartida.AGUARDANDO_JOGADOR;
     }
 
+    public Long getIdPartida() {
+        return idPartida;
+    }
+
+    public String getNomePartida() {
+        return nomePartida;
+    }
+
     public List<Jogador> getJogadores() {
         return jogadores;
     }
 
     public StatusDaPartida getStatus() {
         return status;
+    }
+
+    public PartidaInfo getInfoPartida() {
+        if (this.jogadores.size() == 1) {
+            return new PartidaInfo(this.idPartida, this.nomePartida, this.jogadores.get(0));
+        }
+        return new PartidaInfo(this.idPartida, this.nomePartida, this.jogadores.get(0), this.jogadores.get(1));
     }
 
     public synchronized void start(Jogador jogador) {
@@ -59,16 +77,39 @@ public class Partida extends Thread {
     }
 
     @Override
+    public int hashCode() {
+        int hash = 5;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Partida other = (Partida) obj;
+        return Objects.equals(this.idPartida, other.idPartida);
+    }
+
+    @Override
     public void run() {
         this.status = StatusDaPartida.EM_ANDAMENTO;
-        jogadores.forEach((jogador) -> {
+        jogadores.forEach(jogador -> {
             try {
-                jogador.getConexao().enviar(new MensagemTexto("Partida está sendo iniciada!", AcaoDaMensagem.TEXTO));
+                Mensagem<PartidaInfo> msg = new Mensagem<>(AcaoDaMensagem.INICIAR_PARTIDA, getInfoPartida());
+                Util.printarEnvioInfo(jogador, msg);
+                jogador.getConexao().enviar(msg);
             } catch (IOException ex) {
                 Logger.getLogger(Partida.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
-        Mensagem msg;
+
         while (this.jogadores.get(0).getConexao().isConectionOpen() && this.jogadores.get(1).getConexao().isConectionOpen() && StatusDaPartida.EM_ANDAMENTO.equals(this.status)) {
             try {
                 Mao maoAtual = new Mao();
@@ -98,22 +139,112 @@ public class Partida extends Thread {
     }
 
     private void enviarCartas(Jogador jogador) throws IOException {
-        Mensagem mensagemOpcoes = new MensagemOpcoes(AcaoDaMensagem.MOSTRAR_CARTAS);
-        for (int i = 0; i < jogador.getCartas().size(); i++) {
-            ((MensagemOpcoes) mensagemOpcoes).addOpcao(new Opcao(String.valueOf(i), jogador.getCartas().get(i).getLabel()));
-        }
-        jogador.getConexao().enviar(mensagemOpcoes);
+        Mensagem<JogadorInfo> msg = new Mensagem<>(AcaoDaMensagem.MOSTRAR_CARTAS, new JogadorInfo(jogador));
+        Util.printarEnvioInfo(jogador, msg);
+        jogador.getConexao().enviar(msg);
     }
 
     private void iniciarMao(Mao mao, Jogador jogador1, Jogador jogador2) throws IOException, ClassNotFoundException {
         Jogo.darCartas(jogador1, jogador2);
         enviarCartas(jogador1);
         enviarCartas(jogador2);
+        Mensagem<Jogada> msgFromJogador1 = null, msgFromJogador2 = null;
+        while (mao.getJogadorGanhador() == null) {//Enquanto a mão não tiver um ganhador.
+            Rodada rodadaAtual = new Rodada();
 
-        while (mao.getJogadorGanhador() == null) {
-            Mensagem msgFromJogador1 = jogador1.getConexao().receber();
-            mao.setJogadorGanhador(jogador1);
+            while (rodadaAtual.getJogadorGanhador() == null) {//Enquanto a rodada não tiver um ganhador
+                enviarDadosJogada(jogador1, jogador2, mao, msgFromJogador2);
+                msgFromJogador1 = jogador1.getConexao().receber();
+                Util.printarRecebimentoInfo(jogador1, msgFromJogador1);
+
+                enviarDadosJogada(jogador2, jogador1, mao, msgFromJogador1);
+                msgFromJogador2 = jogador2.getConexao().receber();
+                Util.printarRecebimentoInfo(jogador2, msgFromJogador2);
+
+                calcularGanhadorRodada(rodadaAtual, jogador1, jogador2, msgFromJogador1, msgFromJogador2);
+            }
+
+            calcularGanhadorDaMao(rodadaAtual, mao);
         }
+    }
+
+    /**
+     * Envia os dados(Opções de jogada) para o jogador que está na vez
+     * informando o outro jogador para aguardar.
+     *
+     * @param jogadorQueVaiJogar
+     * @param jogadorParaAguardar
+     * @param mao
+     * @param msgOutroJogador
+     * @throws IOException
+     */
+    private void enviarDadosJogada(Jogador jogadorQueVaiJogar, Jogador jogadorParaAguardar, Mao mao, Mensagem<Jogada> msgOutroJogador) throws IOException {
+        jogadorQueVaiJogar.getConexao().enviar(montarMenuJogador(mao, jogadorQueVaiJogar, msgOutroJogador));
+        jogadorParaAguardar.getConexao().enviar(new Mensagem(AcaoDaMensagem.AGUARDAR_OUTRO_JOGADOR, null));
+    }
+
+    /**
+     * Monta o menu com opções de jogadas que o jogador pode realizar
+     *
+     * @param mao
+     * @param jogador
+     * @param msgOutraJogada
+     * @return
+     */
+    private Mensagem<MenuAcoes> montarMenuJogador(Mao mao, Jogador jogador, Mensagem<Jogada> msgOutraJogada) {
+        MenuAcoes menu = new MenuAcoes(msgOutraJogada == null ? null : msgOutraJogada.getValor());
+        List<Jogada> jogadasPossiveis = new ArrayList<>();
+        jogadasPossiveis.add(new Jogada(AcaoDaJogada.IR_PARA_BARALHO, null));
+        if (null == msgOutraJogada) {
+            jogador.getCartas().stream().forEach((carta) -> {
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.JOGADA_SIMPLES, carta));
+            });
+        }
+        if (Jogo.podeChamarTruco(mao)) {
+            jogadasPossiveis.add(new Jogada(AcaoDaJogada.TRUCO, null));
+        } else if (Jogo.podeChamarRetruco(mao)) {
+            jogadasPossiveis.add(new Jogada(AcaoDaJogada.RETRUCO, null));
+        } else if (Jogo.podeChamarValeQuatro(mao)) {
+            jogadasPossiveis.add(new Jogada(AcaoDaJogada.VALE_QUATRO, null));
+        }
+
+        if (null == msgOutraJogada) {
+            if (Jogo.podeChamarEnvido(jogador)) {
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.ENVIDO, null));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.REAL_ENVIDO, null));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.FALTA_ENVIDO, null));
+            }
+            if (Jogo.podeChamarFlor(jogador)) {
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.FLOR, null));
+            }
+        }
+
+        if (msgOutraJogada != null) {
+            if (AcaoDaJogada.ENVIDO.equals(msgOutraJogada.getValor().getAcaoDaJogada())) {
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.REAL_ENVIDO, null));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.FALTA_ENVIDO, null));
+            } else if (AcaoDaJogada.REAL_ENVIDO.equals(msgOutraJogada.getValor().getAcaoDaJogada())) {
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.FALTA_ENVIDO, null));
+            }
+            if (Jogo.podeChamarContraFlor(jogador) && AcaoDaJogada.FLOR.equals(msgOutraJogada.getValor().getAcaoDaJogada())) {
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.CONTRA_FLOR, null));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.CONTRA_FLOR_E_RESTO, null));
+            } else if (Jogo.podeChamarFlor(jogador)) {
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.FLOR, null));
+            }
+            jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null));
+            jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null));
+        }
+        menu.getJogadas().addAll(jogadasPossiveis);
+        return new Mensagem<>(AcaoDaMensagem.JOGAR, menu);
+    }
+
+    private void calcularGanhadorRodada(Rodada rodadaAtual, Jogador jogador1, Jogador jogador2, Mensagem msgFromJogador1, Mensagem msgFromJogador2) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    private void calcularGanhadorDaMao(Rodada rodadaAtual, Mao mao) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

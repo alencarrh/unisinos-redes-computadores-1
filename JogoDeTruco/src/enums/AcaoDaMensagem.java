@@ -1,21 +1,22 @@
 package enums;
 
+import java.io.Serializable;
+
 /**
  * @class Acao
  * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
  * @date 30/03/2017
  */
-public enum AcaoDaMensagem {
-    
-        JOGADOR_CRIADO,
-        FINALIZAR_CONEXAO,
-        CRIAR_NOVA_PARTIDA,
-        LISTA_PARTIDAS_DISPONIVEIS,
-        ENTRAR_NA_PARTIDA,
-        SAIR_DA_PARTIDA,
-        MOSTRAR_RESULTADO_FINAL,
-        JOGADA,
-        TEXTO,
-        MOSTRAR_CARTAS
+public enum AcaoDaMensagem implements Serializable {
+
+    FINALIZAR_CONEXAO,
+    DADOS_JOGADOR,
+    ATUALIZAR_DADOS_JOGADOR,
+    LISTAR_PARTIDAS,
+    ESCOLHER_PARTIDA,
+    INICIAR_PARTIDA,
+    MOSTRAR_CARTAS,
+    JOGAR,
+    AGUARDAR_OUTRO_JOGADOR,
 
 }

@@ -13,6 +13,7 @@ import java.util.List;
  */
 public class Rodada implements Serializable {
 
+    private Jogador jogadorGanhador;
     private final List<Jogada> jogadas;
     private int tentosDaRodada;
 
@@ -31,6 +32,14 @@ public class Rodada implements Serializable {
 
     public void aumentarTentosDaRodada(int tentosAAumentar) {
         this.tentosDaRodada += tentosAAumentar;
+    }
+
+    public Jogador getJogadorGanhador() {
+        return jogadorGanhador;
+    }
+
+    public void setJogadorGanhador(Jogador jogadorGanhador) {
+        this.jogadorGanhador = jogadorGanhador;
     }
 
     /**

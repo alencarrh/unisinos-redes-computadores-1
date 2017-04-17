@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * @class Player
+ * @class Jogador
  * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
  * @date 30/03/2017
  */

@@ -1,7 +1,7 @@
 package servidor;
 
 import comunicacao.ControladorConexao;
-import enums.DirecaoDaMensagem;
+import comunicacao.Mensagem;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.ServerSocket;
@@ -37,7 +37,7 @@ public class Servidor implements Serializable {
         this.rodando = Boolean.TRUE;
         System.out.println("Servidor Iniciado...");
         while (isRodando()) {
-            ControladorConexao novaConexao = new ControladorConexao(serverSocket.accept());
+            ControladorConexao<Mensagem> novaConexao = new ControladorConexao(serverSocket.accept());
             //Conexão é a única diferença para determinar se o jogador já existe ou não.
             JogadorListener temp = new JogadorListener(new Jogador(null, null, novaConexao));
             if (!JOGADORES.contains(temp)) {
@@ -47,7 +47,6 @@ public class Servidor implements Serializable {
                 novoJogadorListener.start();
             }
         }
-
     }
 
     public void pararServidor() throws IOException {
@@ -59,7 +58,7 @@ public class Servidor implements Serializable {
         return rodando;
     }
 
-    public Long getNextJogadorId() {
+    public synchronized Long getNextJogadorId() {
         return this.nextJogadorId++;
     }
 
