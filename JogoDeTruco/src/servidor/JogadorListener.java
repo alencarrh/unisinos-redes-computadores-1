@@ -1,14 +1,10 @@
 package servidor;
 
 import comunicacao.Mensagem;
-import comunicacao.MensagemEntrarEmPartida;
-import comunicacao.MensagemJogada;
-import comunicacao.MensagemJogador;
-import comunicacao.MensagemOpcoes;
-import comunicacao.Opcao;
+import comunicacao.transporte.JogadorInfo;
+import comunicacao.transporte.PartidaInfo;
+import comunicacao.transporte.PartidasInfo;
 import enums.AcaoDaMensagem;
-import enums.DirecaoDaMensagem;
-import enums.StatusDaPartida;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -17,7 +13,8 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jogo.Jogador;
-import jogo.Sala;
+import jogo.Partida;
+import util.Util;
 
 /**
  * Classe responável por controler uma única conexão (por objeto).
@@ -28,9 +25,9 @@ import jogo.Sala;
  */
 public class JogadorListener extends Thread implements Serializable {
 
-    private static Long idsSalas = new Long(1);
-    private static final List<Sala> SALAS = new ArrayList<>();
-    private Sala salaDesteJogador;
+    private static Long idNextPartida = new Long(10);
+    private static final List<Partida> PARTIDAS = new ArrayList<>();
+    private Partida partidaDesteJogador;
     private final Jogador jogador;
 
     public JogadorListener(Jogador jogador) {
@@ -46,49 +43,13 @@ public class JogadorListener extends Thread implements Serializable {
             enviarInformacoesDeUsuario();
             while (this.jogador.getConexao().isConectionOpen()) {
                 Mensagem msg = this.jogador.getConexao().receber();
-                System.out.println("Servidor recebeu(#" + jogador.getNomeJogador() + "): " + msg);
+                Util.printarRecebimentoInfo(jogador, msg);
                 tratarMensagem(msg);
             }
         } catch (IOException | ClassNotFoundException ex) {
-            SALAS.remove(this.salaDesteJogador);
+            PARTIDAS.remove(this.partidaDesteJogador);
             Logger.getLogger(JogadorListener.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-
-    private void tratarMensagem(Mensagem msg) throws IOException {
-        switch (msg.getAcaoDaMensagem()) {
-            case FINALIZAR_CONEXAO:
-                //TODO: finalizar esta conexão
-                break;
-            case LISTA_PARTIDAS_DISPONIVEIS:
-                //TODO: enviar mensagem para usuário com lista de salas disponiveis
-                retornarSalasDisponiveis();
-                break;
-            case CRIAR_NOVA_PARTIDA:
-                //TODO: criar uma nova sala/partida
-                criarNovaPartida();
-                break;
-//            case SAIR_DA_PARTIDA:
-//                //TODO: sair da partida // veriricar se será realmente implementado
-//                break;
-            case ENTRAR_NA_PARTIDA:
-                //TODO: adicionar o usuário a partida que ele selecionou
-                adicionarJogadorNaPartida(msg);
-                break;
-            case JOGADOR_CRIADO:
-                //TODO: atualizar informações do jogador
-                atualizarDadosJogador((MensagemJogador) msg);
-        }
-    }
-
-    @Override
-    public void interrupt() {
-        try {
-            this.jogador.getConexao().close(true);
-        } catch (IOException ex) {
-            Logger.getLogger(JogadorListener.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        super.interrupt();
     }
 
     @Override
@@ -112,48 +73,101 @@ public class JogadorListener extends Thread implements Serializable {
         return Objects.equals(this.jogador, other.jogador);
     }
 
-    private void retornarSalasDisponiveis() throws IOException {
-        MensagemOpcoes msg = new MensagemOpcoes(DirecaoDaMensagem.PARA_CLIENTE, AcaoDaMensagem.LISTA_PARTIDAS_DISPONIVEIS, "Opção: ");
-        SALAS.stream().filter((sala) -> (StatusDaPartida.AGUARDANDO_JOGADOR.equals(sala.getStatus()))).forEachOrdered((sala) -> {
-            msg.addOpcao(new Opcao(sala.getIdSala().toString(), sala.getJogagores().get(0).getNomeJogador()));
-        });
-        System.out.println("Servidor enviando(#" + this.jogador.getNomeJogador() + "): " + msg);
-        this.jogador.getConexao().enviar(msg);
+    /**
+     * Finaliza a conexão antes de finalizar a Thread.
+     */
+    @Override
+    public void interrupt() {
+        try {
+            this.jogador.getConexao().close();
+        } catch (IOException ex) {
+            Logger.getLogger(JogadorListener.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        super.interrupt();
     }
 
-    private void atualizarDadosJogador(MensagemJogador mensagemJogador) {
-        this.jogador.setNomeJogador(mensagemJogador.getNomeJogador());
+    /**
+     * Obtém o ID para criação da próxima partida.
+     *
+     * @return id único para criação de uma partida.
+     */
+    public static synchronized Long getIdNextPartida() {
+        return idNextPartida++;
     }
 
-    private void criarNovaPartida() {
-        Sala novaSala = new Sala(getNextSalaId(), this.jogador.getNomeJogador(), jogador);
-        this.salaDesteJogador = novaSala;
-        SALAS.add(novaSala);
-        super.interrupt();//vai interromper esta thread pois agora quer irá ouvir e tratar as mensagem do jogador é a partida
-    }
-
-    private Long getNextSalaId() {
-        return idsSalas++;
-    }
-
-    private void adicionarJogadorNaPartida(Mensagem msgTemp) {
-        MensagemEntrarEmPartida msg = (MensagemEntrarEmPartida) msgTemp;
-        this.salaDesteJogador = SALAS.get(SALAS.indexOf(new Sala(new Long(msg.getIdSala()))));
-        if (StatusDaPartida.AGUARDANDO_JOGADOR.equals(this.salaDesteJogador.getStatus())) {
-            SALAS.remove(this.salaDesteJogador);
-            this.salaDesteJogador.addJogador(jogador);
-            super.interrupt();//vai interromper esta thread pois agora quer irá ouvir e tratar as mensagem do jogador é a partida
+    /**
+     * Faz o tratamento da mensagem recebida
+     *
+     * @param msg
+     * @throws IOException
+     */
+    private void tratarMensagem(Mensagem msg) throws IOException {
+        switch (msg.getAcaoDaMensagem()) {
+            case LISTAR_PARTIDAS:
+                enviarListaDePartidas();
+                break;
+            case ATUALIZAR_DADOS_JOGADOR:
+                atualizarDadosJogador(msg);
+                break;
+            case ESCOLHER_PARTIDA:
+                entrarNaPartida(msg);
+                break;
+            case FINALIZAR_CONEXAO:
+                this.interrupt();
+                break;
         }
     }
 
+    /**
+     * Envia as informações inicias(dados do usuário) para o cliente que abriu a
+     * conexão
+     *
+     * @throws IOException
+     */
     private void enviarInformacoesDeUsuario() throws IOException {
-        Mensagem msg = new MensagemJogador(DirecaoDaMensagem.PARA_CLIENTE, AcaoDaMensagem.JOGADOR_CRIADO, this.jogador);
-        System.out.println("Servidor enviando(#" + this.jogador.getNomeJogador() + "): " + msg);
+        Mensagem<JogadorInfo> msg = new Mensagem<>(AcaoDaMensagem.DADOS_JOGADOR, new JogadorInfo(jogador));
+        Util.printarEnvioInfo(jogador, msg);
         this.jogador.getConexao().enviar(msg);
     }
 
-    private void realizarJogada(MensagemJogada mensagemJogada) {
-//        this.salaDesteJogador.jogar(mensagemJogada);
+    /**
+     * Envia para o cliente a lista de partidas disponíveis
+     *
+     * @throws IOException
+     */
+    private void enviarListaDePartidas() throws IOException {
+        Mensagem<PartidasInfo> msg = new Mensagem<>(AcaoDaMensagem.LISTAR_PARTIDAS, new PartidasInfo(PARTIDAS));
+        Util.printarEnvioInfo(jogador, msg);
+        this.jogador.getConexao().enviar(msg);
+    }
+
+    /**
+     * Atualiza os dados do usuário
+     *
+     * @param msg
+     */
+    private void atualizarDadosJogador(Mensagem<JogadorInfo> msg) {
+        this.jogador.setNomeJogador(msg.getValor().getNomeJogador());
+    }
+
+    /**
+     * Cria uma nova partida, sendo o this.jogador como criador. Ou entra em uma
+     * partida já existente. Após a criação ou Junção a uma partida,
+     * JogadorListener é interrompido.
+     *
+     * @param msg se idPartida for null, é feito a criação de uma nova partida.
+     * Caso contrário, é juntado a uma partida.
+     */
+    private void entrarNaPartida(Mensagem<PartidaInfo> msg) {
+        if (msg.getValor() == null) {
+            this.partidaDesteJogador = new Partida(getIdNextPartida(), this.jogador.getNomeJogador(), this.jogador);
+            PARTIDAS.add(partidaDesteJogador);
+        } else {
+            this.partidaDesteJogador = PARTIDAS.get(PARTIDAS.indexOf(new Partida(msg.getValor().getIdPartida(), null, null)));
+            PARTIDAS.remove(this.partidaDesteJogador);
+            this.partidaDesteJogador.start(this.jogador);
+        }
+        super.interrupt();
     }
 
 }

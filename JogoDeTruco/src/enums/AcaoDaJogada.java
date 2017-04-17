@@ -1,27 +1,43 @@
 package enums;
 
+import java.io.Serializable;
+
 /**
  * @class AcaoDoJogo
  * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
  * @date 30/03/2017
  */
-public enum AcaoDaJogada {
+public enum AcaoDaJogada implements Serializable {
 
-    //comandos do jogo
-    JOGADA_SIMPLES,
-    QUERO,
-    NAO_QUERO,
-    ENVIDO,
-    REAL_ENVIDO,
-    FALTA_ENVIDO,
-    FLOR,
-    CONTRA_FLOR,
-    CONTRA_FLOR_E_RESTO,
-    TRUCO,
-    RETRUCO,
-    VALE_QUATRO,
-    IR_PARA_BARALHO,
-    ESCONDER_CARTA,
-    DAR_AS_CARTAS
+    JOGADA_SIMPLES("", "Jogou "),
+    QUERO("Quero", "Aceitou"),
+    NAO_QUERO("Não Quero", "Recusou"),
+    TRUCO("Chamar Truco", "Chamou Truco"),
+    RETRUCO("Chamar ReTruco", "Aumentou para ReTruco"),
+    VALE_QUATRO("Chamar Vale Quatro", "Aumentou para Vale QUATRO"),
+    ENVIDO("Chamar Envido", "Chamou Envido"),
+    REAL_ENVIDO("Chamar Real Envido", "Aumentou para Real Envido"),
+    FALTA_ENVIDO("Chamar Falta Envido", "Chamou Falta ENVIDO"),
+    FLOR("Chamar Flor", "Chamou FLOR"),
+    CONTRA_FLOR("Chamar Contra-Flor", "Chamou CONTRA-FLOR!"),
+    CONTRA_FLOR_E_RESTO("Chamar Contra-Flor-e-Resto", "AUMENTOU PARA CONTRA-FLOR-E-RESTO!!"),
+    IR_PARA_BARALHO("Correr", "Correu"),
+    DAR_AS_CARTAS("Dar as cartas", "Deu as cartas");
+
+    private final String opcaoMenu;
+    private final String acaoRealizada;
+
+    private AcaoDaJogada(String toString, String acaoRealizada) {
+        this.opcaoMenu = toString;
+        this.acaoRealizada = acaoRealizada;
+    }
+
+    public String getOpcaoMenu() {
+        return opcaoMenu;
+    }
+
+    public String getAcaoRealizada() {
+        return acaoRealizada;
+    }
 
 }

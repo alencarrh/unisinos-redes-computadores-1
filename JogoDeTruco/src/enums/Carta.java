@@ -1,11 +1,13 @@
 package enums;
 
+import java.io.Serializable;
+
 /**
- *
- * @created 30/03/2017
- * @author alencar.hentges (CWI Software)
+ * @class Carta
+ * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
+ * @date 30/03/2017
  */
-public enum Carta {
+public enum Carta implements Serializable {
     //Quatro melhores
     UM_ESPADA(14, Naipe.ESPADA, "1 Espada", 1), UM_PAUS(13, Naipe.PAUS, "1 Paus", 1), SETE_ESPADA(12, Naipe.ESPADA, "7 Espada", 7), SETE_OURO(11, Naipe.OURO, "7 Ouro", 7),
     //3s

@@ -1,20 +1,21 @@
 package jogo;
 
 import comunicacao.ControladorConexao;
+import comunicacao.Mensagem;
 import enums.Carta;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
 /**
- * @class Player
+ * @class Jogador
  * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
  * @date 30/03/2017
  */
 public class Jogador extends Thread implements Serializable {
 
     private final Long idJogador;
-    private final ControladorConexao conexao;
+    private final ControladorConexao<Mensagem> conexao;
     private String nomeJogador;
     private int tentos;
     private List<Carta> cartas;
@@ -51,7 +52,7 @@ public class Jogador extends Thread implements Serializable {
         this.tentos = tentos;
     }
 
-    public ControladorConexao getConexao() {
+    public ControladorConexao<Mensagem> getConexao() {
         return conexao;
     }
 

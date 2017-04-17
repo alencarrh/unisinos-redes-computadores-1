@@ -1,36 +1,31 @@
 package comunicacao;
 
-import enums.AcaoDaMensagem;
-import enums.DirecaoDaMensagem;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.Socket;
 import java.util.Objects;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
+ * @param <T>
  * @class ConnectionController
  * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
  * @date 31/03/2017
  */
-public class ControladorConexao implements Serializable {
+public class ControladorConexao<T> implements Serializable {
 
     private final Socket socket;
     private final ObjectOutputStream output;
     private final ObjectInputStream input;
-    private final DirecaoDaMensagem direcaoDaMensagem;
     private boolean conectionOpen;
 
-    public ControladorConexao(String destino, int porta, DirecaoDaMensagem direcaoDaMensagem) throws IOException {
-        this(new Socket(destino, porta), direcaoDaMensagem);
+    public ControladorConexao(String destino, int porta) throws IOException {
+        this(new Socket(destino, porta));
     }
 
-    public ControladorConexao(Socket socket, DirecaoDaMensagem direcaoDaMensagem) throws IOException {
+    public ControladorConexao(Socket socket) throws IOException {
         this.socket = socket;
-        this.direcaoDaMensagem = direcaoDaMensagem;
         this.output = new ObjectOutputStream(this.socket.getOutputStream());
         this.input = new ObjectInputStream(this.socket.getInputStream());
         this.conectionOpen = true;
@@ -54,8 +49,9 @@ public class ControladorConexao implements Serializable {
      * @param msg
      * @return <i>true</i> se a mensagem foi enviada com sucesso. <i>false</i>
      * caso houve algum problema no envio.
+     * @throws java.io.IOException
      */
-    public boolean enviar(Mensagem msg) throws IOException {
+    public boolean enviar(T msg) throws IOException {
         if (isConectionOpen()) {
             output.writeObject(msg);
             output.flush();
@@ -67,26 +63,23 @@ public class ControladorConexao implements Serializable {
      * Aguarda o recebimento de uma mensagem do servidor.
      *
      * @return <i>mensagem</i> do servidor.
+     * @throws java.io.IOException
+     * @throws java.lang.ClassNotFoundException
      */
-    public Mensagem receber() throws IOException, ClassNotFoundException {
+    public T receber() throws IOException, ClassNotFoundException {
         if (isConectionOpen()) {
-            return (Mensagem) input.readObject();
+            return (T) input.readObject();
         }
-        return new Mensagem(this.direcaoDaMensagem, AcaoDaMensagem.FINALIZAR_CONEXAO);
-
+        return null;
     }
 
     /**
      * Finaliza esta conexão. Caso <i>sendSignalToClose</i> seja <i>true</i> é
      * feito o envio de uma mensagem com o sinal de finalização.
      *
-     * @param sendSignalToClose
      * @throws IOException
      */
-    public void close(boolean sendSignalToClose) throws IOException {
-        if (sendSignalToClose) {
-            enviar(new Mensagem(this.direcaoDaMensagem, AcaoDaMensagem.FINALIZAR_CONEXAO));
-        }
+    public void close() throws IOException {
         this.conectionOpen = false;
         this.output.close();
         this.input.close();
