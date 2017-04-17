@@ -5,13 +5,13 @@ import comunicacao.MensagemOpcoes;
 import comunicacao.MensagemTexto;
 import comunicacao.Opcao;
 import enums.AcaoDaMensagem;
-import enums.DirecaoDaMensagem;
 import enums.StatusDaPartida;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import util.Util;
 
 /**
  * Partida: Representa um jogo de truco. É composto por várias mãos. Termina
@@ -23,19 +23,23 @@ import java.util.logging.Logger;
  */
 public class Partida extends Thread {
 
-    private StatusDaPartida status;
+    private final Long idPartida;
+    private final String nomePartida;
     private final List<Jogador> jogadores;
     private final List<Mao> maos;
 
-    public Partida(Jogador primeiroJogador) {
+    private StatusDaPartida status;
+
+    public Partida(Long id, String nome, Jogador primeiroJogador) {
+        if (Util.isNull(id) || Util.isNull(primeiroJogador) || Util.isStringEmpty(nome)) {
+            throw new IllegalArgumentException("Parâmetros inválidos. [Contrutor partida]");
+        }
+        this.idPartida = id;
+        this.nomePartida = nome;
         this.maos = new ArrayList<>();
         this.jogadores = new ArrayList<>();
         this.jogadores.add(primeiroJogador);
         this.status = StatusDaPartida.AGUARDANDO_JOGADOR;
-    }
-
-    public void addJogador(Jogador outroJogador) {
-        this.jogadores.add(outroJogador);
     }
 
     public List<Jogador> getJogadores() {
@@ -46,12 +50,20 @@ public class Partida extends Thread {
         return status;
     }
 
+    public synchronized void start(Jogador jogador) {
+        if (this.jogadores.isEmpty() || !StatusDaPartida.AGUARDANDO_JOGADOR.equals(this.status)) {
+            throw new IllegalStateException("Partida não está AGUARDANDO_JOGADOR. É necessário a existência de dois jogadores para a partida poder iniciar.");
+        }
+        this.jogadores.add(jogador);
+        super.start();
+    }
+
     @Override
     public void run() {
         this.status = StatusDaPartida.EM_ANDAMENTO;
         jogadores.forEach((jogador) -> {
             try {
-                jogador.getConexao().enviar(new MensagemTexto("Partida está sendo iniciada!", DirecaoDaMensagem.PARA_CLIENTE, AcaoDaMensagem.TEXTO));
+                jogador.getConexao().enviar(new MensagemTexto("Partida está sendo iniciada!", AcaoDaMensagem.TEXTO));
             } catch (IOException ex) {
                 Logger.getLogger(Partida.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -86,7 +98,7 @@ public class Partida extends Thread {
     }
 
     private void enviarCartas(Jogador jogador) throws IOException {
-        Mensagem mensagemOpcoes = new MensagemOpcoes(DirecaoDaMensagem.PARA_CLIENTE, AcaoDaMensagem.MOSTRAR_CARTAS);
+        Mensagem mensagemOpcoes = new MensagemOpcoes(AcaoDaMensagem.MOSTRAR_CARTAS);
         for (int i = 0; i < jogador.getCartas().size(); i++) {
             ((MensagemOpcoes) mensagemOpcoes).addOpcao(new Opcao(String.valueOf(i), jogador.getCartas().get(i).getLabel()));
         }

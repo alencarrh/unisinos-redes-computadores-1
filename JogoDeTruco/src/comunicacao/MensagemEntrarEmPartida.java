@@ -1,7 +1,6 @@
 package comunicacao;
 
 import enums.AcaoDaMensagem;
-import enums.DirecaoDaMensagem;
 import java.io.Serializable;
 
 /**
@@ -13,8 +12,8 @@ public class MensagemEntrarEmPartida extends Mensagem implements Serializable {
 
     private final String idSala;
 
-    public MensagemEntrarEmPartida(DirecaoDaMensagem direcaoDaMensagem, AcaoDaMensagem acaoDaMensagem, String idSala) {
-        super(direcaoDaMensagem, acaoDaMensagem);
+    public MensagemEntrarEmPartida(AcaoDaMensagem acaoDaMensagem, String idSala) {
+        super(acaoDaMensagem);
         this.idSala = idSala;
     }
 
@@ -26,7 +25,5 @@ public class MensagemEntrarEmPartida extends Mensagem implements Serializable {
     public String toString() {
         return "MensagemEntrarEmPartida{" + "idSala=" + idSala + '}';
     }
-    
-    
 
 }

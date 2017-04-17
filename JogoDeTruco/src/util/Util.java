@@ -9,7 +9,10 @@ import java.util.Random;
  */
 public class Util {
 
-    public static final Random randomGenerator = new Random();
+    /**
+     *
+     */
+    public static final Random RANDOM_GENERATOR = new Random();
 
     public static String gerarNomeAleatorio() {
         int numeroPalavras = showRandomInteger(5, 10);
@@ -30,7 +33,7 @@ public class Util {
      *
      * @param aStart
      * @param aEnd
-     * @param aRandom
+     * @return
      */
     public static int showRandomInteger(int aStart, int aEnd) {
         if (aStart > aEnd) {
@@ -39,8 +42,17 @@ public class Util {
         //get the range, casting to long to avoid overflow problems
         long range = (long) aEnd - (long) aStart + 1;
         // compute a fraction of the range, 0 <= frac < range
-        long fraction = (long) (range * randomGenerator.nextDouble());
+        long fraction = (long) (range * RANDOM_GENERATOR.nextDouble());
         int randomNumber = (int) (fraction + aStart);
         return randomNumber;
     }
+
+    public static boolean isStringEmpty(String string) {
+        return isNull(string) || "".equals(string);
+    }
+
+    public static boolean isNull(Object object) {
+        return object == null;
+    }
+
 }

@@ -1,7 +1,6 @@
 package comunicacao;
 
 import enums.AcaoDaMensagem;
-import enums.DirecaoDaMensagem;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,14 +15,14 @@ public class MensagemOpcoes extends Mensagem implements Serializable {
     private String pergunta;
     private final List<Opcao> opcoes;
 
-    public MensagemOpcoes(DirecaoDaMensagem direcaoDaMensagem, AcaoDaMensagem acaoDaMensagem) {
-        super(direcaoDaMensagem, acaoDaMensagem);
+    public MensagemOpcoes(AcaoDaMensagem acaoDaMensagem) {
+        super(acaoDaMensagem);
         this.opcoes = new ArrayList<>();
         this.pergunta = null;
     }
 
-    public MensagemOpcoes(DirecaoDaMensagem direcaoDaMensagem, AcaoDaMensagem acaoDaMensagem, String pergunta) {
-        super(direcaoDaMensagem, acaoDaMensagem);
+    public MensagemOpcoes(AcaoDaMensagem acaoDaMensagem, String pergunta) {
+        super(acaoDaMensagem);
         this.opcoes = new ArrayList<>();
         this.pergunta = pergunta;
     }
@@ -53,11 +52,10 @@ public class MensagemOpcoes extends Mensagem implements Serializable {
         String part1 = "MensagemOpcoes{" + "pergunta=" + pergunta + ", opcoes=[";
         String part2 = "";
         for (Opcao opcao : opcoes) {
-            part2 += opcao.toString()+",";
+            part2 += opcao.toString() + ",";
         }
         String part3 = "]}";
-        return part1+part2+part3;
+        return part1 + part2 + part3;
     }
-    
 
 }

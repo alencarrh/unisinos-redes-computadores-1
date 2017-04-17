@@ -1,7 +1,6 @@
 package comunicacao;
 
 import enums.AcaoDaMensagem;
-import enums.DirecaoDaMensagem;
 
 /**
  * @class MensagemTexto
@@ -12,12 +11,12 @@ public class MensagemTexto extends Mensagem {
 
     private String texto;
 
-    public MensagemTexto(DirecaoDaMensagem direcaoDaMensagem, AcaoDaMensagem acaoDaMensagem) {
-        super(direcaoDaMensagem, acaoDaMensagem);
+    public MensagemTexto(AcaoDaMensagem acaoDaMensagem) {
+        super(acaoDaMensagem);
     }
 
-    public MensagemTexto(String texto, DirecaoDaMensagem direcaoDaMensagem, AcaoDaMensagem acaoDaMensagem) {
-        super(direcaoDaMensagem, acaoDaMensagem);
+    public MensagemTexto(String texto, AcaoDaMensagem acaoDaMensagem) {
+        super(acaoDaMensagem);
         this.texto = texto;
     }
 

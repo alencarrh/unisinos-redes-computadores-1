@@ -24,7 +24,7 @@ import jogo.Jogador;
 public class ClienteMain {
 
     private static Jogador jogador;
-    private static ControladorConexao conexao;
+    private static ControladorConexao<Mensagem> conexao;
     private static final BufferedReader KEYBOARD_INPUT = new BufferedReader(new InputStreamReader(System.in));
 
     public static void main(String[] args) throws IOException, Exception {
@@ -47,29 +47,11 @@ public class ClienteMain {
         //Verifica se o IP do servidor foi passado por parâmetro
         System.out.println("Estabelecendo conexão com o servidor...");
         if (args.length == 0) {
-            conexao = new ControladorConexao("127.0.0.1", 6789, DirecaoDaMensagem.PARA_SERVIDOR);
+            conexao = new ControladorConexao("127.0.0.1", 6789);
         } else {
-            conexao = new ControladorConexao(args[0], 6789, DirecaoDaMensagem.PARA_SERVIDOR);
+            conexao = new ControladorConexao(args[0], 6789);
         }
         System.out.println("Conexão estabelecida com sucesso!");
-    }
-
-    private static Thread createListener() {
-        Thread listener = new Thread(() -> {
-            while (conexao.isConectionOpen()) {
-                try {
-                    Mensagem fromServer = conexao.receber();
-                    System.out.println(fromServer);
-                    switch (fromServer.getAcaoDaMensagem()) {
-                        
-                    }
-                } catch (IOException | ClassNotFoundException ex) {
-                    Logger.getLogger(ClienteMain.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        });
-
-        return listener;
     }
 
     private static void iniciarInformacoesSobreJogador() throws Exception {
@@ -88,7 +70,7 @@ public class ClienteMain {
         String nomeJogador = KEYBOARD_INPUT.readLine();
         if (nomeJogador != null && !nomeJogador.isEmpty() && !nomeJogador.equalsIgnoreCase("#random")) {
             jogador.setNomeJogador(nomeJogador);
-            conexao.enviar(new MensagemJogador(DirecaoDaMensagem.PARA_SERVIDOR, AcaoDaMensagem.JOGADOR_CRIADO, jogador));
+            conexao.enviar(new MensagemJogador(AcaoDaMensagem.JOGADOR_CRIADO, jogador));
         }
     }
 
@@ -111,14 +93,14 @@ public class ClienteMain {
                 System.out.println(((MensagemTexto) msg).getTexto());
                 break;
             case MOSTRAR_CARTAS:
-                mostrarCartas((MensagemOpcoes)msg);
+                mostrarCartas((MensagemOpcoes) msg);
                 break;
-                
+
         }
     }
 
     private static void solicitaSalasDisponiveis() throws IOException {
-        conexao.enviar(new Mensagem(DirecaoDaMensagem.PARA_SERVIDOR, AcaoDaMensagem.LISTA_PARTIDAS_DISPONIVEIS));
+        conexao.enviar(new Mensagem(AcaoDaMensagem.LISTA_PARTIDAS_DISPONIVEIS));
     }
 
     private static void mostrarSalasDiponiveis(MensagemOpcoes mensagemOpcoes) throws IOException {
@@ -130,12 +112,12 @@ public class ClienteMain {
         String inputUsuario = KEYBOARD_INPUT.readLine();
         Mensagem msg;
         if (inputUsuario.equals("0")) {
-            msg = new Mensagem(DirecaoDaMensagem.PARA_SERVIDOR, AcaoDaMensagem.CRIAR_NOVA_PARTIDA);
+            msg = new Mensagem(AcaoDaMensagem.CRIAR_NOVA_PARTIDA);
             System.out.println("Sala criada com sucesso!");
             System.out.println("No aguardo de outro jogador para iniciar a partida...\n");
         } else {
             System.out.println("Entrando nada sala do jogador " + mensagemOpcoes.getOpcoes().get(new Integer(inputUsuario) - 1).labelOpcao);
-            msg = new MensagemEntrarEmPartida(DirecaoDaMensagem.PARA_SERVIDOR, AcaoDaMensagem.ENTRAR_NA_PARTIDA, inputUsuario);
+            msg = new MensagemEntrarEmPartida(AcaoDaMensagem.ENTRAR_NA_PARTIDA, inputUsuario);
         }
         conexao.enviar(msg);
     }

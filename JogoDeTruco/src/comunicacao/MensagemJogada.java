@@ -3,7 +3,6 @@ package comunicacao;
 import enums.AcaoDaJogada;
 import enums.AcaoDaMensagem;
 import enums.Carta;
-import enums.DirecaoDaMensagem;
 
 /**
  * @class MensagemJogada
@@ -12,11 +11,21 @@ import enums.DirecaoDaMensagem;
  */
 public class MensagemJogada extends Mensagem {
 
-    private AcaoDaJogada acaoDaJogada;
-    private Carta carta;
+    private final AcaoDaJogada acaoDaJogada;
+    private final Carta carta;
 
-    public MensagemJogada(DirecaoDaMensagem direcaoDaMensagem, AcaoDaMensagem acaoDaMensagem) {
-        super(direcaoDaMensagem, acaoDaMensagem);
+    public MensagemJogada(AcaoDaJogada acaoDaJogada, Carta carta, AcaoDaMensagem acaoDaMensagem) {
+        super(acaoDaMensagem);
+        this.acaoDaJogada = acaoDaJogada;
+        this.carta = carta;
+    }
+
+    public AcaoDaJogada getAcaoDaJogada() {
+        return acaoDaJogada;
+    }
+
+    public Carta getCarta() {
+        return carta;
     }
 
 }

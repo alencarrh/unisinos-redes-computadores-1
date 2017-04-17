@@ -1,7 +1,6 @@
 package comunicacao;
 
 import enums.AcaoDaMensagem;
-import enums.DirecaoDaMensagem;
 import java.io.Serializable;
 import jogo.Jogador;
 
@@ -16,19 +15,19 @@ public class MensagemJogador extends Mensagem implements Serializable {
     private Long idJogador;
     private int tentos;
 
-    public MensagemJogador(String nomeJogador, Long idJogador, int tentos, DirecaoDaMensagem direcaoDaMensagem, AcaoDaMensagem acaoDaMensagem) {
-        super(direcaoDaMensagem, acaoDaMensagem);
+    public MensagemJogador(String nomeJogador, Long idJogador, int tentos, AcaoDaMensagem acaoDaMensagem) {
+        super(acaoDaMensagem);
         this.nomeJogador = nomeJogador;
         this.idJogador = idJogador;
         this.tentos = tentos;
     }
 
-    public MensagemJogador(DirecaoDaMensagem direcaoDaMensagem, AcaoDaMensagem acaoDaMensagem) {
-        super(direcaoDaMensagem, acaoDaMensagem);
+    public MensagemJogador(AcaoDaMensagem acaoDaMensagem) {
+        super(acaoDaMensagem);
     }
 
-    public MensagemJogador(DirecaoDaMensagem direcaoDaMensagem, AcaoDaMensagem acaoDaMensagem, Jogador jogador) {
-        super(direcaoDaMensagem, acaoDaMensagem);
+    public MensagemJogador(AcaoDaMensagem acaoDaMensagem, Jogador jogador) {
+        super(acaoDaMensagem);
         this.nomeJogador = jogador.getNomeJogador();
         this.idJogador = jogador.getIdJogador();
         this.tentos = jogador.getTentos();

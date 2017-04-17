@@ -11,16 +11,10 @@ import java.io.Serializable;
  */
 public class Mensagem implements Serializable {
 
-    private final DirecaoDaMensagem direcaoDaMensagem;
     private final AcaoDaMensagem acaoDaMensagem;
 
-    public Mensagem(DirecaoDaMensagem direcaoDaMensagem, AcaoDaMensagem acaoDaMensagem) {
-        this.direcaoDaMensagem = direcaoDaMensagem;
+    public Mensagem(AcaoDaMensagem acaoDaMensagem) {
         this.acaoDaMensagem = acaoDaMensagem;
-    }
-
-    public DirecaoDaMensagem getDirecaoDaMensagem() {
-        return direcaoDaMensagem;
     }
 
     public AcaoDaMensagem getAcaoDaMensagem() {
@@ -29,7 +23,7 @@ public class Mensagem implements Serializable {
 
     @Override
     public String toString() {
-        return "Mensagem{" + "direcaoDaMensagem=" + direcaoDaMensagem + ", acaoDaMensagem=" + acaoDaMensagem + '}';
+        return "Mensagem{" + "acaoDaMensagem=" + acaoDaMensagem + '}';
     }
 
 }
