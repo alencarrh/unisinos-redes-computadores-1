@@ -37,12 +37,12 @@ public class Jogo {
         return EstadoDaMao.RETRUCO.equals(mao.getEstadoDaMao());
     }
 
-    public static boolean podeChamarEnvido(Jogador jogador) {
-        return jogador.getCartas().size() == 3;
+    public static boolean podeChamarEnvido(Mao mao, Jogador jogador) {
+        return jogador.getCartas().size() == 3 && !mao.isChamadoEnvido();
     }
 
-    public static boolean podeChamarFlor(Jogador jogador) {
-        if (podeChamarEnvido(jogador)) {
+    public static boolean podeChamarFlor(Mao mao, Jogador jogador) {
+        if (podeChamarEnvido(mao, jogador)) {
             List<Carta> cartas = jogador.getCartas();
             //Carta1 == Carta2 && Carta1 == Carta3
             return (cartas.get(0).isMesmoNaipe(cartas.get(1))) && (cartas.get(0).isMesmoNaipe(cartas.get(2)));
@@ -50,8 +50,8 @@ public class Jogo {
         return false;
     }
 
-    public static boolean podeChamarContraFlor(Jogador jogador) {
-        return podeChamarFlor(jogador);
+    public static boolean podeChamarContraFlor(Mao mao, Jogador jogador) {
+        return podeChamarFlor(mao, jogador);
     }
 
     public static void darCartas(Jogador jogador1, Jogador jogador2) {

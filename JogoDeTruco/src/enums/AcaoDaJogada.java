@@ -16,7 +16,7 @@ public enum AcaoDaJogada implements Serializable {
     RETRUCO("Chamar ReTruco", "Aumentou para ReTruco"),
     VALE_QUATRO("Chamar Vale Quatro", "Aumentou para Vale QUATRO"),
     ENVIDO("Chamar Envido", "Chamou Envido"),
-    REAL_ENVIDO("Chamar Real Envido", "Aumentou para Real Envido"),
+    REAL_ENVIDO("Chamar Real Envido", "Chamou Real Envido"),
     FALTA_ENVIDO("Chamar Falta Envido", "Chamou Falta ENVIDO"),
     FLOR("Chamar Flor", "Chamou FLOR"),
     CONTRA_FLOR("Chamar Contra-Flor", "Chamou CONTRA-FLOR!"),

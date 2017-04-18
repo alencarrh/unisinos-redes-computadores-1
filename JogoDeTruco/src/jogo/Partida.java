@@ -138,17 +138,32 @@ public class Partida extends Thread {
         //
     }
 
+    /**
+     * Envia as cartas para o jogador
+     *
+     * @param jogador
+     * @throws IOException
+     */
     private void enviarCartas(Jogador jogador) throws IOException {
         Mensagem<JogadorInfo> msg = new Mensagem<>(AcaoDaMensagem.MOSTRAR_CARTAS, new JogadorInfo(jogador));
         Util.printarEnvioInfo(jogador, msg);
         jogador.getConexao().enviar(msg);
     }
 
+    /**
+     * Realiza e controla uma Mao.
+     *
+     * @param mao
+     * @param jogador1
+     * @param jogador2
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     private void iniciarMao(Mao mao, Jogador jogador1, Jogador jogador2) throws IOException, ClassNotFoundException {
         Jogo.darCartas(jogador1, jogador2);
         enviarCartas(jogador1);
         enviarCartas(jogador2);
-        Mensagem<Jogada> msgFromJogador1 = null, msgFromJogador2 = null;
+        Mensagem msgFromJogador1 = null, msgFromJogador2 = null;
         while (mao.getJogadorGanhador() == null) {//Enquanto a mão não tiver um ganhador.
             Rodada rodadaAtual = new Rodada();
 
@@ -194,47 +209,12 @@ public class Partida extends Thread {
     private Mensagem<MenuAcoes> montarMenuJogador(Mao mao, Jogador jogador, Mensagem<Jogada> msgOutraJogada) {
         MenuAcoes menu = new MenuAcoes(msgOutraJogada == null ? null : msgOutraJogada.getValor());
         List<Jogada> jogadasPossiveis = new ArrayList<>();
+        if (msgOutraJogada == null) {
+            montarMenuSimples(mao, jogador, jogadasPossiveis);
+        } else {
+            montarMenuComplexo(mao, jogador, jogadasPossiveis, msgOutraJogada.getValor());
+        }
         jogadasPossiveis.add(new Jogada(AcaoDaJogada.IR_PARA_BARALHO, null));
-        if (null == msgOutraJogada) {
-            jogador.getCartas().stream().forEach((carta) -> {
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.JOGADA_SIMPLES, carta));
-            });
-        }
-        if (Jogo.podeChamarTruco(mao)) {
-            jogadasPossiveis.add(new Jogada(AcaoDaJogada.TRUCO, null));
-        } else if (Jogo.podeChamarRetruco(mao)) {
-            jogadasPossiveis.add(new Jogada(AcaoDaJogada.RETRUCO, null));
-        } else if (Jogo.podeChamarValeQuatro(mao)) {
-            jogadasPossiveis.add(new Jogada(AcaoDaJogada.VALE_QUATRO, null));
-        }
-
-        if (null == msgOutraJogada) {
-            if (Jogo.podeChamarEnvido(jogador)) {
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.ENVIDO, null));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.REAL_ENVIDO, null));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.FALTA_ENVIDO, null));
-            }
-            if (Jogo.podeChamarFlor(jogador)) {
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.FLOR, null));
-            }
-        }
-
-        if (msgOutraJogada != null) {
-            if (AcaoDaJogada.ENVIDO.equals(msgOutraJogada.getValor().getAcaoDaJogada())) {
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.REAL_ENVIDO, null));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.FALTA_ENVIDO, null));
-            } else if (AcaoDaJogada.REAL_ENVIDO.equals(msgOutraJogada.getValor().getAcaoDaJogada())) {
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.FALTA_ENVIDO, null));
-            }
-            if (Jogo.podeChamarContraFlor(jogador) && AcaoDaJogada.FLOR.equals(msgOutraJogada.getValor().getAcaoDaJogada())) {
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.CONTRA_FLOR, null));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.CONTRA_FLOR_E_RESTO, null));
-            } else if (Jogo.podeChamarFlor(jogador)) {
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.FLOR, null));
-            }
-            jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null));
-            jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null));
-        }
         menu.getJogadas().addAll(jogadasPossiveis);
         return new Mensagem<>(AcaoDaMensagem.JOGAR, menu);
     }
@@ -245,6 +225,91 @@ public class Partida extends Thread {
 
     private void calcularGanhadorDaMao(Rodada rodadaAtual, Mao mao) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    /**
+     * Monta o menu baseado nas cartas e no estado da mao. Não considera a
+     * jogada anterior.
+     *
+     * @param mao
+     * @param jogador
+     * @param jogadasPossiveis
+     */
+    private void montarMenuSimples(Mao mao, Jogador jogador, List<Jogada> jogadasPossiveis) {
+        jogador.getCartas().stream().forEach((carta) -> {
+            jogadasPossiveis.add(new Jogada(AcaoDaJogada.JOGADA_SIMPLES, carta));
+        });
+        if (Jogo.podeChamarTruco(mao)) {
+            jogadasPossiveis.add(new Jogada(AcaoDaJogada.TRUCO, null));
+        } else if (Jogo.podeChamarRetruco(mao)) {
+            jogadasPossiveis.add(new Jogada(AcaoDaJogada.RETRUCO, null));
+        } else if (Jogo.podeChamarValeQuatro(mao)) {
+            jogadasPossiveis.add(new Jogada(AcaoDaJogada.VALE_QUATRO, null));
+        }
+        if (Jogo.podeChamarEnvido(mao, jogador)) {
+            jogadasPossiveis.add(new Jogada(AcaoDaJogada.ENVIDO, null));
+            jogadasPossiveis.add(new Jogada(AcaoDaJogada.REAL_ENVIDO, null));
+            jogadasPossiveis.add(new Jogada(AcaoDaJogada.FALTA_ENVIDO, null));
+        }
+        if (Jogo.podeChamarFlor(mao, jogador)) {
+            jogadasPossiveis.add(new Jogada(AcaoDaJogada.FLOR, null));
+        }
+    }
+
+    /**
+     * Monta o menu de opções baseado na jogada anterior do outro jogador.
+     *
+     * @param mao
+     * @param jogador
+     * @param jogadasPossiveis
+     * @param jogadaAnterior
+     */
+    private void montarMenuComplexo(Mao mao, Jogador jogador, List<Jogada> jogadasPossiveis, Jogada jogadaAnterior) {
+        if (jogadaAnterior == null) {
+            montarMenuSimples(mao, jogador, jogadasPossiveis);
+            return;
+        }
+        switch (jogadaAnterior.getAcaoDaJogada()) {
+            case JOGADA_SIMPLES:
+                montarMenuSimples(mao, jogador, jogadasPossiveis);
+                return;
+            case TRUCO:
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.RETRUCO, null));
+                return;
+            case RETRUCO:
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.VALE_QUATRO, null));
+                return;
+            case VALE_QUATRO:
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null));
+                return;
+            case ENVIDO:
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.REAL_ENVIDO, null));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.FALTA_ENVIDO, null));
+                return;
+            case REAL_ENVIDO:
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.FALTA_ENVIDO, null));
+                return;
+            case FALTA_ENVIDO:
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null));
+                return;
+            case FLOR:
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.CONTRA_FLOR, null));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.CONTRA_FLOR_E_RESTO, null));
+                return;
+
+        }
     }
 
 }
