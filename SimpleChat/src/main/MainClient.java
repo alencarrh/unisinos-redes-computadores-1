@@ -1,6 +1,6 @@
 package main;
 
-import classes.Controller;
+import classes.ConnectionController;
 import classes.Mensagem;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,7 +15,7 @@ import java.util.logging.Logger;
  */
 public class MainClient {
 
-    private static Controller controler;
+    private static ConnectionController controler;
     private static final BufferedReader KEYBOARD_INPUT = new BufferedReader(new InputStreamReader(System.in));
 
     public static void main(String[] args) throws IOException {
@@ -25,9 +25,9 @@ public class MainClient {
         
         //Verifica se o IP do servidor foi passado por parâmetro
         if (args.length == 0) {
-            controler = new Controller("127.0.0.1", 6789);
+            controler = new ConnectionController("127.0.0.1", 6789);
         }else{
-            controler = new Controller(args[0], 6789);
+            controler = new ConnectionController(args[0], 6789);
         }
         Mensagem toServer;
 

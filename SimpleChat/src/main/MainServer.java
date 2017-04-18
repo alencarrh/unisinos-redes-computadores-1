@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import server.ServerController;
+import server.Server;
 
 /**
  * @class MainServer
@@ -14,11 +14,11 @@ import server.ServerController;
  */
 public class MainServer {
 
-    static ServerController server;
+    static Server server;
     private static final BufferedReader KEYBOARD_INPUT = new BufferedReader(new InputStreamReader(System.in));
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        server = new ServerController(6789);
+        server = new Server(6789);
 
         Thread startServer = new Thread(() -> {
             try {
@@ -30,7 +30,7 @@ public class MainServer {
 
         startServer.start();
 
-        System.out.println("Preciona 'Enter' a qualquer momento para parar o servidor...");
+        System.out.println("Pressione 'Enter' a qualquer momento para parar o servidor...");
         KEYBOARD_INPUT.readLine();
 
         server.stopServer();
