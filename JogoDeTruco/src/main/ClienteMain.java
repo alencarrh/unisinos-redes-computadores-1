@@ -2,12 +2,13 @@ package main;
 
 import comunicacao.ControladorConexao;
 import comunicacao.Mensagem;
+import comunicacao.transporte.Info;
 import comunicacao.transporte.JogadorInfo;
 import comunicacao.transporte.MenuAcoes;
 import comunicacao.transporte.PartidaInfo;
 import comunicacao.transporte.PartidasInfo;
+import comunicacao.transporte.RodadaInfo;
 import enums.AcaoDaMensagem;
-import enums.Carta;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -89,7 +90,14 @@ public class ClienteMain {
                 jogar(msg);
                 break;
             case AGUARDAR_OUTRO_JOGADOR:
-                System.out.println("Aguardando outro jogador realizar sua jogada...");
+                System.out.println("\nAguardando outro jogador realizar sua jogada...\n");
+                break;
+            case DADOS_RODADA:
+                mostrarDadosRodada(msg);
+                break;
+            case INFORMAR_PERDA_CONEXAO:
+                informarPerdaConexao(msg);
+                carregarSalasDisponiveis();
                 break;
             case FINALIZAR_CONEXAO:
                 conexao.close();
@@ -114,11 +122,11 @@ public class ClienteMain {
     private static void realizarAcaoListagemSala(Long id, PartidasInfo partidas) throws IOException {
         switch (id.intValue()) {
             case 0:
-                conexao.enviar(new Mensagem(AcaoDaMensagem.FINALIZAR_CONEXAO, null));
+                conexao.enviar(new Mensagem<>(AcaoDaMensagem.FINALIZAR_CONEXAO, null));
                 conexao.close();
                 break;
             case 1:
-                conexao.enviar(new Mensagem(AcaoDaMensagem.ESCOLHER_PARTIDA, null));
+                conexao.enviar(new Mensagem<>(AcaoDaMensagem.ESCOLHER_PARTIDA, null));
                 System.out.println("\nPartida criada... Aguardando outro jogador juntar-se a sua partida...\n");
                 break;
             case 2:
@@ -130,7 +138,7 @@ public class ClienteMain {
                     System.out.println("Opção inválida!");
                     carregarSalasDisponiveis();
                 } else {
-                    conexao.enviar(new Mensagem(AcaoDaMensagem.ESCOLHER_PARTIDA, partidas.getPartidas().get(pos)));
+                    conexao.enviar(new Mensagem<>(AcaoDaMensagem.ESCOLHER_PARTIDA, partidas.getPartidas().get(pos)));
                     System.out.println("\nConectando-se a partida de " + partidas.getPartidas().get(pos).getNomePartida() + "...\n");
                 }
         }
@@ -140,7 +148,6 @@ public class ClienteMain {
     private static void iniciarPartida(Mensagem<PartidaInfo> msg) {
         System.out.println(msg.getValor().getJogador1().getNomeJogador() + " vs " + msg.getValor().getJogador2().getNomeJogador());
         System.out.println("\nIniciado partida...\n");
-
     }
 
     private static void mostrarCartas(Mensagem<JogadorInfo> msg) {
@@ -161,8 +168,8 @@ public class ClienteMain {
         System.out.print("Jogar: ");
         String opJogada = KEYBOARD_INPUT.readLine();
         //TODO: validar jogada
-        Integer op = new Integer(opJogada) + -1;
-        conexao.enviar(new Mensagem(AcaoDaMensagem.JOGAR, jogadas.get(op)));
+        Integer op = new Integer(opJogada) - 1;
+        conexao.enviar(new Mensagem<>(AcaoDaMensagem.JOGAR, jogadas.get(op)));
     }
 
     private static void mostrarJogadaAnterior(Jogada jogadaAnterior) {
@@ -170,6 +177,28 @@ public class ClienteMain {
             return;
         }
         System.out.println("\n" + jogadaAnterior.getAcaoRealizada() + "\n");
+    }
+
+    private static void mostrarDadosRodada(Mensagem<RodadaInfo> msg) {
+        RodadaInfo r = msg.getValor();
+        if (r.getJogadorGanhador() != null) {
+            if (r.getJogadorGanhador().getNomeJogador().equals(jogador.getNomeJogador())) {
+                System.out.println("\nVocê ganhou esta rodada!");
+            } else {
+                System.out.println("\n"
+                        + r.getJogadorGanhador().getNomeJogador()
+                        + " "
+                        + r.getUtilmaJogadaDoJogador(r.getJogadorGanhador()).getAcaoRealizada()
+                        + " e ganhou a rodada");
+            }
+        } else {
+            System.out.println("\n" + r.getJogadas().get(r.getJogadas().size() - 1).getAcaoRealizada());
+        }
+
+    }
+
+    private static void informarPerdaConexao(Mensagem<Info> msg) {
+        System.out.println("\n" + msg.getValor().getInformacao() + "\n");
     }
 
 }

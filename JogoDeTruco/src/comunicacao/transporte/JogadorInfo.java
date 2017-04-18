@@ -3,6 +3,7 @@ package comunicacao.transporte;
 import enums.Carta;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 import jogo.Jogador;
 
 /**
@@ -54,6 +55,27 @@ public class JogadorInfo implements Serializable {
 
     public void setCartas(List<Carta> cartas) {
         this.cartas = cartas;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final JogadorInfo other = (JogadorInfo) obj;
+        return Objects.equals(this.idJogador, other.idJogador);
     }
 
     @Override

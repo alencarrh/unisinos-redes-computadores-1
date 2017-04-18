@@ -18,6 +18,7 @@ public class Mao implements Serializable {
     private final List<Rodada> rodadas;
     private EstadoDaMao estadoDaMao;
     private Jogador jogadorGanhador;
+    private boolean chamadoEnvido;
 
     public Mao() {
         this.rodadas = new ArrayList<>();
@@ -42,6 +43,14 @@ public class Mao implements Serializable {
 
     public void setJogadorGanhador(Jogador jogadorGanhador) {
         this.jogadorGanhador = jogadorGanhador;
+    }
+
+    public boolean isChamadoEnvido() {
+        return chamadoEnvido;
+    }
+
+    public void setChamadoEnvido(boolean chamadoEnvido) {
+        this.chamadoEnvido = chamadoEnvido;
     }
 
 }

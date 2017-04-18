@@ -41,7 +41,7 @@ public class JogadorListener extends Thread implements Serializable {
     public void run() {
         try {
             enviarInformacoesDeUsuario();
-            while (this.jogador.getConexao().isConectionOpen()) {
+            while (this.jogador.getConexao().isConectionOpen() && this.partidaDesteJogador == null) {
                 Mensagem msg = this.jogador.getConexao().receber();
                 Util.printarRecebimentoInfo(jogador, msg);
                 tratarMensagem(msg);
@@ -83,7 +83,6 @@ public class JogadorListener extends Thread implements Serializable {
         } catch (IOException ex) {
             Logger.getLogger(JogadorListener.class.getName()).log(Level.SEVERE, null, ex);
         }
-        super.interrupt();
     }
 
     /**
@@ -167,7 +166,6 @@ public class JogadorListener extends Thread implements Serializable {
             PARTIDAS.remove(this.partidaDesteJogador);
             this.partidaDesteJogador.start(this.jogador);
         }
-        super.interrupt();
     }
 
 }

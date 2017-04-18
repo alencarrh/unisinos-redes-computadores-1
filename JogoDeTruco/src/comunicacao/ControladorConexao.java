@@ -67,8 +67,13 @@ public class ControladorConexao<T> implements Serializable {
      * @throws java.lang.ClassNotFoundException
      */
     public T receber() throws IOException, ClassNotFoundException {
-        if (isConectionOpen()) {
-            return (T) input.readObject();
+        try {
+            if (isConectionOpen()) {
+                return (T) input.readObject();
+            }
+        } catch (IOException | ClassNotFoundException ex) {
+            this.conectionOpen = false;
+            throw ex;
         }
         return null;
     }

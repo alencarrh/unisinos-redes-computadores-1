@@ -10,24 +10,24 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * @class Controller
+ * @class ConnectionController
  * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
  * @date 25/03/2017
  */
-public class Controller implements Serializable {
+public class ConnectionController implements Serializable {
 
     private final Socket socket;
     private final ObjectOutputStream output;
     private final ObjectInputStream input;
     private boolean conectionOpen;
 
-    public Controller(String destino, int porta) throws IOException {
+    public ConnectionController(String destino, int porta) throws IOException {
         this(new Socket(destino, porta));
     }
 
-    public Controller(Socket socket) throws IOException {
+    public ConnectionController(Socket socket) throws IOException {
         this.socket = socket;
-        this.output = new ObjectOutputStream(socket.getOutputStream());
+        this.output = new ObjectOutputStream(this.socket.getOutputStream());
         this.input = new ObjectInputStream(this.socket.getInputStream());
         this.conectionOpen = true;
     }
@@ -44,13 +44,6 @@ public class Controller implements Serializable {
         return input;
     }
 
-    /**
-     * Faz o envio de uma mensagem para o servidor.
-     *
-     * @param msg
-     * @return <i>true</i> se a mensagem foi enviada com sucesso. <i>false</i>
-     * caso houve algum problema no envio.
-     */
     public boolean enviar(Mensagem msg) {
         try {
             if (isConectionOpen()) {
@@ -58,17 +51,12 @@ public class Controller implements Serializable {
                 output.flush();
             }
         } catch (IOException ex) {
-            Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ConnectionController.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
         return true;
     }
 
-    /**
-     * Aguarda o recebimento de uma mensagem do servidor.
-     *
-     * @return <i>mensagem</i> do servidor.
-     */
     public Mensagem receber() {
         try {
             if (isConectionOpen()) {
@@ -76,18 +64,11 @@ public class Controller implements Serializable {
             }
             return new Mensagem("finish_connection", null);
         } catch (IOException | ClassNotFoundException ex) {
-            Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ConnectionController.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
     }
 
-    /**
-     * Finaliza esta conexão. Caso <i>sendSignalToClose</i> seja <i>true</i> é
-     * feito o envio de uma mensagem com o sinal de finalização.
-     *
-     * @param sendSignalToClose
-     * @throws IOException
-     */
     public void close(boolean sendSignalToClose) throws IOException {
         if (sendSignalToClose) {
             enviar(new Mensagem("finish_connection", null));
@@ -115,7 +96,7 @@ public class Controller implements Serializable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final Controller other = (Controller) obj;
+        final ConnectionController other = (ConnectionController) obj;
         return Objects.equals(this.socket, other.socket);
     }
 

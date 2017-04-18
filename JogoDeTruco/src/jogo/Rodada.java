@@ -1,5 +1,7 @@
 package jogo;
 
+import comunicacao.transporte.JogadorInfo;
+import comunicacao.transporte.RodadaInfo;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +44,22 @@ public class Rodada implements Serializable {
         this.jogadorGanhador = jogadorGanhador;
     }
 
+    public RodadaInfo getInfoRodada() {
+        return new RodadaInfo(this);
+    }
+
+    /**
+     *
+     * @param jogador
+     * @return
+     */
+    public Jogada getUtilmaJogadaDoJogador(JogadorInfo jogador) {
+        return getInfoRodada().getUtilmaJogadaDoJogador(jogador);
+    }
+
+    public Jogada getUtilmaJogadaDoJogador(Jogador jogador) {
+        return getInfoRodada().getUtilmaJogadaDoJogador(jogador.getInfoJogador());
+    }
     /**
      * TODO: métodos para somar pontuação caso a rodada seja de envido ou flor.
      * Caso contrário, será uma rodada simples ou de chamada de
