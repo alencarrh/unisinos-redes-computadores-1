@@ -13,7 +13,7 @@ import java.util.Objects;
  * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
  * @date 30/03/2017
  */
-public class Jogador extends Thread implements Serializable {
+public class Jogador implements Serializable {
 
     private final Long idJogador;
     private final ControladorConexao<Mensagem> conexao;
@@ -26,11 +26,6 @@ public class Jogador extends Thread implements Serializable {
         this.nomeJogador = nome;
         this.conexao = conexao;
         this.tentos = 0;
-    }
-
-    @Override
-    public void run() {
-
     }
 
     public Long getIdJogador() {

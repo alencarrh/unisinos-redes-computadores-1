@@ -2,6 +2,7 @@ package main;
 
 import comunicacao.ControladorConexao;
 import comunicacao.Mensagem;
+import comunicacao.transporte.Info;
 import comunicacao.transporte.JogadorInfo;
 import comunicacao.transporte.MenuAcoes;
 import comunicacao.transporte.PartidaInfo;
@@ -94,6 +95,10 @@ public class ClienteMain {
             case DADOS_RODADA:
                 mostrarDadosRodada(msg);
                 break;
+            case INFORMAR_PERDA_CONEXAO:
+                informarPerdaConexao(msg);
+                carregarSalasDisponiveis();
+                break;
             case FINALIZAR_CONEXAO:
                 conexao.close();
                 break;
@@ -143,7 +148,6 @@ public class ClienteMain {
     private static void iniciarPartida(Mensagem<PartidaInfo> msg) {
         System.out.println(msg.getValor().getJogador1().getNomeJogador() + " vs " + msg.getValor().getJogador2().getNomeJogador());
         System.out.println("\nIniciado partida...\n");
-
     }
 
     private static void mostrarCartas(Mensagem<JogadorInfo> msg) {
@@ -191,6 +195,10 @@ public class ClienteMain {
             System.out.println("\n" + r.getJogadas().get(r.getJogadas().size() - 1).getAcaoRealizada());
         }
 
+    }
+
+    private static void informarPerdaConexao(Mensagem<Info> msg) {
+        System.out.println("\n" + msg.getValor().getInformacao() + "\n");
     }
 
 }

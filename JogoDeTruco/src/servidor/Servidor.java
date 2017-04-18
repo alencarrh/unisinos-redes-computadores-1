@@ -49,6 +49,17 @@ public class Servidor implements Serializable {
         }
     }
 
+    public static synchronized void iniciarJogadorListener(Jogador jogador) {
+        JogadorListener novoJogadorListener = new JogadorListener(jogador);
+        JOGADORES.remove(novoJogadorListener);
+        novoJogadorListener.start();
+        JOGADORES.add(novoJogadorListener);
+    }
+
+    public static synchronized void removerJogadorListener(Jogador jogador) {
+        JOGADORES.remove(new JogadorListener(jogador));
+    }
+
     public void pararServidor() throws IOException {
         JOGADORES.stream().forEach(JogadorListener::interrupt);
         this.serverSocket.close();

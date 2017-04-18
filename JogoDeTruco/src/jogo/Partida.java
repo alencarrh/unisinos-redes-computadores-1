@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import servidor.Servidor;
 import util.Util;
 
 /**
@@ -112,8 +113,8 @@ public class Partida extends Thread {
                 Logger.getLogger(Partida.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
-
-        while (this.jogadores.get(0).getConexao().isConectionOpen() && this.jogadores.get(1).getConexao().isConectionOpen() && StatusDaPartida.EM_ANDAMENTO.equals(this.status)) {
+        boolean semErros = true;
+        while (this.jogadores.get(0).getConexao().isConectionOpen() && this.jogadores.get(1).getConexao().isConectionOpen() && StatusDaPartida.EM_ANDAMENTO.equals(this.status) && semErros) {
             try {
                 Mao maoAtual = new Mao();
                 if ((maos.size() + 1) % 2 == 0) {//jogador 2 começa
@@ -124,34 +125,16 @@ public class Partida extends Thread {
                 maos.add(maoAtual);
             } catch (IOException | ClassNotFoundException ex) {
                 Logger.getLogger(Partida.class.getName()).log(Level.SEVERE, null, ex);
-                try {
-                    if (!jogadores.get(0).getConexao().isConectionOpen()) {
-                        informarPerdaDeConexao(jogadores.get(1));
-                        break;
-                    }
-                    if (!jogadores.get(1).getConexao().isConectionOpen()) {
-                        informarPerdaDeConexao(jogadores.get(0));
-                        break;
-                    }
-                } catch (IOException ex1) {
-                    Logger.getLogger(Partida.class.getName()).log(Level.SEVERE, null, ex1);
-                    break;
-                }
+                semErros = false;
             }
         }
-
-        // TODO: aqui estará toda a lógica do jogo. 
-        // 1. Deverá aguarda a ação do jogadorX e tratar a jogada deste.
-        // 2. Aguardar para que o jogadorX+1 jogue para tratar sua jogada e 
-        //   determinar se termina a rodada ou não.
-        // 3. Caso a rodada não tenha terminado, volta para o passo 1; Caso a 
-        //   rodada tenha sido terminada, sorteia novas cartas iniciando nova 
-        //   rodada e aguarda jogadorX+1 jogar. 
-        // 4. Quando jogadorX+1 jogar, aguarda o jogadorX jogar e trata sua 
-        //   jogada. Determina se a rodada acabou ou não.
-        // 5. Se a rodada terminou, sorteia as cartas iniciando nova rodada e 
-        //   vai para etapa 1.
-        //
+        if (semErros) {
+            informarPlacarFinal();
+            Servidor.iniciarJogadorListener(jogadores.get(0));
+            Servidor.iniciarJogadorListener(jogadores.get(1));
+        } else {
+            informarJogadoresPerdaConexao();
+        }
     }
 
     /**
@@ -372,6 +355,34 @@ public class Partida extends Thread {
 
     private void informarPerdaDeConexao(Jogador jogador) throws IOException {
         jogador.getConexao().enviar(new Mensagem<>(AcaoDaMensagem.INFORMAR_PERDA_CONEXAO, new Info("O outro jogador perdeu a conexão com a partida...")));
+    }
+
+    private void informarJogadoresPerdaConexao() {
+        try {
+            if (jogadores.get(0).getConexao().isConectionOpen()) {
+                informarPerdaDeConexao(jogadores.get(0));
+                Servidor.iniciarJogadorListener(jogadores.get(0));
+            } else {
+                Servidor.removerJogadorListener(jogadores.get(0));
+            }
+        } catch (IOException ex1) {
+            Logger.getLogger(Partida.class.getName()).log(Level.SEVERE, null, ex1);
+        }
+        try {
+            if (jogadores.get(1).getConexao().isConectionOpen()) {
+                informarPerdaDeConexao(jogadores.get(1));
+                Servidor.iniciarJogadorListener(jogadores.get(1));
+            } else {
+                Servidor.removerJogadorListener(jogadores.get(1));
+
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(Partida.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void informarPlacarFinal() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }
