@@ -169,6 +169,12 @@ public class Partida extends Thread {
             while (rodadaAtual.getJogadorGanhador() == null) {//Enquanto a rodada não tiver um ganhador
                 enviarDadosJogada(jogador1, jogador2, mao, msgFromJogador2);
                 msgFromJogador1 = jogador1.getConexao().receber();
+                //TODO: enquanto não for jogada simples, não segue para segundo jogador.
+                // Isto é: se for chamado Envido,RealEnvido,FaltaEnvido, deve-se
+                // abrir um fluxo separado para tratar o está chama, pois as validações
+                // se modificam das atuais.
+                // A visão do cliente não mudará muito da atual, somente o servidor terá que mudar a fluxo
+                // de execução de tratamento.
                 Util.printarRecebimentoInfo(jogador1, msgFromJogador1);
 
                 enviarDadosJogada(jogador2, jogador1, mao, msgFromJogador1);
