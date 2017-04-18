@@ -51,7 +51,7 @@ public class Servidor implements Serializable {
 
     public static synchronized void iniciarJogadorListener(Jogador jogador) {
         JogadorListener novoJogadorListener = new JogadorListener(jogador);
-        JOGADORES.remove(novoJogadorListener);
+        removerJogadorListener(jogador);
         novoJogadorListener.start();
         JOGADORES.add(novoJogadorListener);
     }

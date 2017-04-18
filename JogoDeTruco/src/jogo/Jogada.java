@@ -46,7 +46,7 @@ public class Jogada implements Serializable {
 
     public String getAcaoRealizada() {
         if (AcaoDaJogada.JOGADA_SIMPLES.equals(this.acaoDaJogada)) {
-            return this.acaoDaJogada.getAcaoRealizada() + carta.toString();
+            return this.acaoDaJogada.getAcaoRealizada() + ' ' + carta.toString();
         }
         return this.acaoDaJogada.getAcaoRealizada();
     }

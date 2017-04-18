@@ -41,6 +41,7 @@ public class JogadorListener extends Thread implements Serializable {
     public void run() {
         try {
             enviarInformacoesDeUsuario();
+            this.partidaDesteJogador = null;
             while (this.jogador.getConexao().isConectionOpen() && this.partidaDesteJogador == null) {
                 Mensagem msg = this.jogador.getConexao().receber();
                 Util.printarRecebimentoInfo(jogador, msg);

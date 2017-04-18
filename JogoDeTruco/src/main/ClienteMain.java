@@ -192,7 +192,8 @@ public class ClienteMain {
                         + " e ganhou a rodada");
             }
         } else {
-            System.out.println("\n" + r.getJogadas().get(r.getJogadas().size() - 1).getAcaoRealizada());
+            Jogada ultimaJogada = r.getJogadas().get(r.getJogadas().size() - 1);
+            System.out.println(ultimaJogada.getJogadorInfo().getNomeJogador() + "\n" + ultimaJogada.getAcaoRealizada());
         }
 
     }
