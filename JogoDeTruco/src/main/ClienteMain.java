@@ -6,6 +6,7 @@ import comunicacao.transporte.JogadorInfo;
 import comunicacao.transporte.MenuAcoes;
 import comunicacao.transporte.PartidaInfo;
 import comunicacao.transporte.PartidasInfo;
+import comunicacao.transporte.RodadaInfo;
 import enums.AcaoDaMensagem;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -90,6 +91,9 @@ public class ClienteMain {
             case AGUARDAR_OUTRO_JOGADOR:
                 System.out.println("\nAguardando outro jogador realizar sua jogada...\n");
                 break;
+            case DADOS_RODADA:
+                mostrarDadosRodada(msg);
+                break;
             case FINALIZAR_CONEXAO:
                 conexao.close();
                 break;
@@ -161,8 +165,7 @@ public class ClienteMain {
         String opJogada = KEYBOARD_INPUT.readLine();
         //TODO: validar jogada
         Integer op = new Integer(opJogada) - 1;
-        Jogada jogada = new Jogada(jogadas.get(op).getAcaoDaJogada(), jogadas.get(op).getCarta());
-        conexao.enviar(new Mensagem<>(AcaoDaMensagem.JOGAR, jogada));
+        conexao.enviar(new Mensagem<>(AcaoDaMensagem.JOGAR, jogadas.get(op)));
     }
 
     private static void mostrarJogadaAnterior(Jogada jogadaAnterior) {
@@ -170,6 +173,24 @@ public class ClienteMain {
             return;
         }
         System.out.println("\n" + jogadaAnterior.getAcaoRealizada() + "\n");
+    }
+
+    private static void mostrarDadosRodada(Mensagem<RodadaInfo> msg) {
+        RodadaInfo r = msg.getValor();
+        if (r.getJogadorGanhador() != null) {
+            if (r.getJogadorGanhador().getNomeJogador().equals(jogador.getNomeJogador())) {
+                System.out.println("\nVocê ganhou esta rodada!");
+            } else {
+                System.out.println("\n"
+                        + r.getJogadorGanhador().getNomeJogador()
+                        + " "
+                        + r.getUtilmaJogadaDoJogador(r.getJogadorGanhador()).getAcaoRealizada()
+                        + " e ganhou a rodada");
+            }
+        } else {
+            System.out.println("\n" + r.getJogadas().get(r.getJogadas().size() - 1).getAcaoRealizada());
+        }
+
     }
 
 }

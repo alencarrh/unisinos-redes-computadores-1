@@ -1,11 +1,14 @@
 package jogo;
 
 import comunicacao.Mensagem;
+import comunicacao.transporte.Info;
 import comunicacao.transporte.JogadorInfo;
 import comunicacao.transporte.MenuAcoes;
 import comunicacao.transporte.PartidaInfo;
+import comunicacao.transporte.RodadaInfo;
 import enums.AcaoDaJogada;
 import enums.AcaoDaMensagem;
+import enums.Carta;
 import enums.StatusDaPartida;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -121,6 +124,19 @@ public class Partida extends Thread {
                 maos.add(maoAtual);
             } catch (IOException | ClassNotFoundException ex) {
                 Logger.getLogger(Partida.class.getName()).log(Level.SEVERE, null, ex);
+                try {
+                    if (!jogadores.get(0).getConexao().isConectionOpen()) {
+                        informarPerdaDeConexao(jogadores.get(1));
+                        break;
+                    }
+                    if (!jogadores.get(1).getConexao().isConectionOpen()) {
+                        informarPerdaDeConexao(jogadores.get(0));
+                        break;
+                    }
+                } catch (IOException ex1) {
+                    Logger.getLogger(Partida.class.getName()).log(Level.SEVERE, null, ex1);
+                    break;
+                }
             }
         }
 
@@ -176,9 +192,19 @@ public class Partida extends Thread {
                 msgFromJogador2 = jogador2.getConexao().receber();
                 Util.printarRecebimentoInfo(jogador2, msgFromJogador2);
 
-                calcularGanhadorRodada(rodadaAtual, jogador1, jogador2, msgFromJogador1, msgFromJogador2);
+                calcularGanhadorRodada(mao, rodadaAtual, jogador1, jogador2, msgFromJogador1, msgFromJogador2);
+                if (rodadaAtual.getJogadorGanhador() != null) {
+                    msgFromJogador1 = msgFromJogador2 = null;
+                    if (jogador2.equals(rodadaAtual.getJogadorGanhador())) {
+                        //Se o jogador2 ganhar a rodada, ele deverá começar a próxima. 
+                        //Logo ele passa a ser o jogador1
+                        Jogador temp = jogador1;
+                        jogador1 = jogador2;
+                        jogador2 = temp;
+                    }
+                }
             }
-
+            enviarDadosFinalRodada(rodadaAtual);
             calcularGanhadorDaMao(rodadaAtual, mao);
         }
     }
@@ -219,12 +245,44 @@ public class Partida extends Thread {
         return new Mensagem<>(AcaoDaMensagem.JOGAR, menu);
     }
 
-    private void calcularGanhadorRodada(Rodada rodadaAtual, Jogador jogador1, Jogador jogador2, Mensagem msgFromJogador1, Mensagem msgFromJogador2) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private void calcularGanhadorRodada(Mao mao, Rodada rodadaAtual, Jogador jogador1, Jogador jogador2, Mensagem<Jogada> msgFromJogador1, Mensagem<Jogada> msgFromJogador2) {
+        Jogada jogada1 = msgFromJogador1.getValor();
+        Jogada jogada2 = msgFromJogador2.getValor();
+        rodadaAtual.getJogadas().add(jogada1);
+        rodadaAtual.getJogadas().add(jogada2);
+        boolean mesmaAcao = jogada1.getAcaoDaJogada().equals(jogada2.getAcaoDaJogada());
+        switch (jogada1.getAcaoDaJogada()) {
+            case JOGADA_SIMPLES:
+                if (mesmaAcao) {
+                    jogador1.getCartas().remove(jogada1.getCarta());
+                    jogador2.getCartas().remove(jogada2.getCarta());
+                    calculaGanhadorJogadaSimples(rodadaAtual, jogador1, jogador2, jogada1.getCarta(), jogada2.getCarta());
+                }
+        }
+    }
+
+    private void calculaGanhadorJogadaSimples(Rodada rodadaAtual, Jogador jogador1, Jogador jogador2, Carta carta1, Carta carta2) {
+        if (carta1.getRanking() >= carta2.getRanking()) {
+            rodadaAtual.setJogadorGanhador(jogador1);
+        } else {
+            rodadaAtual.setJogadorGanhador(jogador2);
+        }
+    }
+
+    private void enviarDadosFinalRodada(Rodada rodadaAtual) {
+        jogadores.forEach(jogador -> {
+            try {
+                Mensagem<RodadaInfo> msg = new Mensagem<>(AcaoDaMensagem.DADOS_RODADA, rodadaAtual.getInfoRodada());
+                Util.printarEnvioInfo(jogador, msg);
+                jogador.getConexao().enviar(msg);
+            } catch (IOException ex) {
+                Logger.getLogger(Partida.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
     }
 
     private void calcularGanhadorDaMao(Rodada rodadaAtual, Mao mao) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        //TODO
     }
 
     /**
@@ -237,22 +295,22 @@ public class Partida extends Thread {
      */
     private void montarMenuSimples(Mao mao, Jogador jogador, List<Jogada> jogadasPossiveis) {
         jogador.getCartas().stream().forEach((carta) -> {
-            jogadasPossiveis.add(new Jogada(AcaoDaJogada.JOGADA_SIMPLES, carta));
+            jogadasPossiveis.add(new Jogada(AcaoDaJogada.JOGADA_SIMPLES, carta, jogador.getInfoJogador()));
         });
         if (Jogo.podeChamarTruco(mao)) {
-            jogadasPossiveis.add(new Jogada(AcaoDaJogada.TRUCO, null));
+            jogadasPossiveis.add(new Jogada(AcaoDaJogada.TRUCO, null, jogador.getInfoJogador()));
         } else if (Jogo.podeChamarRetruco(mao)) {
-            jogadasPossiveis.add(new Jogada(AcaoDaJogada.RETRUCO, null));
+            jogadasPossiveis.add(new Jogada(AcaoDaJogada.RETRUCO, null, jogador.getInfoJogador()));
         } else if (Jogo.podeChamarValeQuatro(mao)) {
-            jogadasPossiveis.add(new Jogada(AcaoDaJogada.VALE_QUATRO, null));
+            jogadasPossiveis.add(new Jogada(AcaoDaJogada.VALE_QUATRO, null, jogador.getInfoJogador()));
         }
         if (Jogo.podeChamarEnvido(mao, jogador)) {
-            jogadasPossiveis.add(new Jogada(AcaoDaJogada.ENVIDO, null));
-            jogadasPossiveis.add(new Jogada(AcaoDaJogada.REAL_ENVIDO, null));
-            jogadasPossiveis.add(new Jogada(AcaoDaJogada.FALTA_ENVIDO, null));
+            jogadasPossiveis.add(new Jogada(AcaoDaJogada.ENVIDO, null, jogador.getInfoJogador()));
+            jogadasPossiveis.add(new Jogada(AcaoDaJogada.REAL_ENVIDO, null, jogador.getInfoJogador()));
+            jogadasPossiveis.add(new Jogada(AcaoDaJogada.FALTA_ENVIDO, null, jogador.getInfoJogador()));
         }
         if (Jogo.podeChamarFlor(mao, jogador)) {
-            jogadasPossiveis.add(new Jogada(AcaoDaJogada.FLOR, null));
+            jogadasPossiveis.add(new Jogada(AcaoDaJogada.FLOR, null, jogador.getInfoJogador()));
         }
     }
 
@@ -274,42 +332,46 @@ public class Partida extends Thread {
                 montarMenuSimples(mao, jogador, jogadasPossiveis);
                 return;
             case TRUCO:
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.RETRUCO, null));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null, jogador.getInfoJogador()));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null, jogador.getInfoJogador()));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.RETRUCO, null, jogador.getInfoJogador()));
                 return;
             case RETRUCO:
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.VALE_QUATRO, null));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null, jogador.getInfoJogador()));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null, jogador.getInfoJogador()));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.VALE_QUATRO, null, jogador.getInfoJogador()));
                 return;
             case VALE_QUATRO:
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null, jogador.getInfoJogador()));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null, jogador.getInfoJogador()));
                 return;
             case ENVIDO:
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.REAL_ENVIDO, null));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.FALTA_ENVIDO, null));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null, jogador.getInfoJogador()));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null, jogador.getInfoJogador()));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.REAL_ENVIDO, null, jogador.getInfoJogador()));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.FALTA_ENVIDO, null, jogador.getInfoJogador()));
                 return;
             case REAL_ENVIDO:
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.FALTA_ENVIDO, null));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null, jogador.getInfoJogador()));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null, jogador.getInfoJogador()));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.FALTA_ENVIDO, null, jogador.getInfoJogador()));
                 return;
             case FALTA_ENVIDO:
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null, jogador.getInfoJogador()));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null, jogador.getInfoJogador()));
                 return;
             case FLOR:
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.CONTRA_FLOR, null));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.CONTRA_FLOR_E_RESTO, null));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null, jogador.getInfoJogador()));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null, jogador.getInfoJogador()));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.CONTRA_FLOR, null, jogador.getInfoJogador()));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.CONTRA_FLOR_E_RESTO, null, jogador.getInfoJogador()));
                 return;
 
         }
+    }
+
+    private void informarPerdaDeConexao(Jogador jogador) throws IOException {
+        jogador.getConexao().enviar(new Mensagem<>(AcaoDaMensagem.INFORMAR_PERDA_CONEXAO, new Info("O outro jogador perdeu a conexão com a partida...")));
     }
 
 }

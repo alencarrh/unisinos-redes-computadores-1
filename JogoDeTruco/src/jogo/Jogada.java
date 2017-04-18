@@ -1,5 +1,6 @@
 package jogo;
 
+import comunicacao.transporte.JogadorInfo;
 import enums.AcaoDaJogada;
 import enums.Carta;
 import java.io.Serializable;
@@ -18,10 +19,17 @@ public class Jogada implements Serializable {
 
     private final AcaoDaJogada acaoDaJogada;
     private final Carta carta;
+    private JogadorInfo jogadorInfo;
 
     public Jogada(AcaoDaJogada acaoDaJogada, Carta carta) {
         this.acaoDaJogada = acaoDaJogada;
         this.carta = carta;
+    }
+
+    public Jogada(AcaoDaJogada acaoDaJogada, Carta carta, JogadorInfo jogador) {
+        this.acaoDaJogada = acaoDaJogada;
+        this.carta = carta;
+        this.jogadorInfo = jogador;
     }
 
     public AcaoDaJogada getAcaoDaJogada() {
@@ -41,6 +49,14 @@ public class Jogada implements Serializable {
             return this.acaoDaJogada.getAcaoRealizada() + carta.toString();
         }
         return this.acaoDaJogada.getAcaoRealizada();
+    }
+
+    public JogadorInfo getJogadorInfo() {
+        return jogadorInfo;
+    }
+
+    public void setJogadorInfo(JogadorInfo jogadorInfo) {
+        this.jogadorInfo = jogadorInfo;
     }
 
     @Override

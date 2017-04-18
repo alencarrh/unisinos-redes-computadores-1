@@ -2,6 +2,7 @@ package jogo;
 
 import comunicacao.ControladorConexao;
 import comunicacao.Mensagem;
+import comunicacao.transporte.JogadorInfo;
 import enums.Carta;
 import java.io.Serializable;
 import java.util.List;
@@ -64,6 +65,10 @@ public class Jogador extends Thread implements Serializable {
         this.nomeJogador = nomeJogador;
     }
 
+    public JogadorInfo getInfoJogador() {
+        return new JogadorInfo(this);
+    }
+
     @Override
     public int hashCode() {
         int hash = 3;
@@ -88,6 +93,10 @@ public class Jogador extends Thread implements Serializable {
     @Override
     public String toString() {
         return "Jogador{" + "idJogador=" + idJogador + ", nomeJogador=" + nomeJogador + ", tentos=" + tentos + '}';
+    }
+
+    public void addTentos(int tentos) {
+        this.tentos += tentos;
     }
 
 }
