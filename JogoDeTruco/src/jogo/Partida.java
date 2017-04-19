@@ -2,6 +2,7 @@ package jogo;
 
 import comunicacao.Mensagem;
 import comunicacao.transporte.Info;
+import comunicacao.transporte.MaoInfo;
 import comunicacao.transporte.PartidaInfo;
 import comunicacao.transporte.RodadaInfo;
 import enums.AcaoDaMensagem;
@@ -202,8 +203,8 @@ public class Partida extends Thread {
                     jogador2 = temp;
                 }
             }
-            enviarDadosRodada(rodadaAtual);
-            calcularGanhadorDaMao(rodadaAtual, mao);
+            calcularGanhadorDaMao(mao);
+            enviarDadosDaMao(mao);
             if (existeGanhadorPartida()) {
                 //Retorna para o while principal
                 return;
@@ -228,10 +229,10 @@ public class Partida extends Thread {
      *
      * @param rodadaAtual
      */
-    private void enviarDadosRodada(Rodada rodadaAtual) {
+    private void enviarDadosDaMao(Mao mao) {
         jogadores.forEach(jogador -> {
             try {
-                Mensagem<RodadaInfo> msg = new Mensagem<>(AcaoDaMensagem.DADOS_RODADA, rodadaAtual.getInfoRodada());
+                Mensagem<MaoInfo> msg = new Mensagem<>(AcaoDaMensagem.DADOS_RODADA, mao.getInfoMao());
                 Util.printarEnvioInfo(jogador, msg);
                 jogador.getConexao().enviar(msg);
             } catch (IOException ex) {
@@ -240,8 +241,39 @@ public class Partida extends Thread {
         });
     }
 
-    private void calcularGanhadorDaMao(Rodada rodadaAtual, Mao mao) {
-        //TODO
+    private void calcularGanhadorDaMao(Mao mao) {
+        int rodadasGanhasJogador1 = 0, rodadasGanhasJogador2 = 0;
+        //rodada atual vai ser adicionada na lista Mao.rodadas após 
+        switch (mao.getRodadas().size()) {
+            case 0:
+                return;
+            case 1:
+                return;
+            case 2:
+                if (mao.getRodadas().get(0).isEmpatou()) {
+                    //Se empatou a 1ª rodada, o jogador que ganhar a 2ª vence.
+                    mao.setJogadorGanhador(mao.getRodadas().get(1).getJogadorGanhador());
+                }
+                return;
+            case 3:
+                if (mao.getRodadas().get(2).isEmpatou()) {
+                    //Se empatou a 3ª rodada, o jogador que ganhou a 2ª vence.
+                    mao.setJogadorGanhador(mao.getRodadas().get(1).getJogadorGanhador());
+                }
+                for (Rodada rodada : mao.getRodadas()) {
+                    if (rodada.getJogadorGanhador().equals(jogadores.get(0))) {
+                        rodadasGanhasJogador1++;
+                    } else {
+                        rodadasGanhasJogador2++;
+                    }
+                }
+                //Jogador que ganhou mais rodadas vence
+                if (rodadasGanhasJogador1 > rodadasGanhasJogador2) {
+                    mao.setJogadorGanhador(jogadores.get(0));
+                } else {
+                    mao.setJogadorGanhador(jogadores.get(1));
+                }
+        }
     }
 
     /**

@@ -108,7 +108,7 @@ public class Jogo {
         } else {
             montarMenuComplexo(mao, jogador, jogadasPossiveis, msgJogadaAnterior.getValor());
         }
-        jogadasPossiveis.add(new Jogada(AcaoDaJogada.IR_PARA_BARALHO, null));
+        jogadasPossiveis.add(new Jogada(AcaoDaJogada.IR_PARA_BARALHO, null, jogador.getInfoJogador()));
         menu.getJogadas().addAll(jogadasPossiveis);
         return new Mensagem<>(AcaoDaMensagem.JOGAR, menu);
     }
@@ -251,8 +251,11 @@ public class Jogo {
      * @param carta2
      */
     public static void calculaGanhadorJogadaSimples(Rodada rodadaAtual, Jogador jogador1, Jogador jogador2, Carta carta1, Carta carta2) {
-        if (carta1.getRanking() >= carta2.getRanking()) {
+        if (carta1.getRanking() > carta2.getRanking()) {
             rodadaAtual.setJogadorGanhador(jogador1);
+        } else if (carta1.getRanking() == carta2.getRanking()) {
+            rodadaAtual.setJogadorGanhador(jogador1);
+            rodadaAtual.setEmpatou(true);
         } else {
             rodadaAtual.setJogadorGanhador(jogador2);
         }
@@ -268,6 +271,7 @@ public class Jogo {
     }
 
     public static boolean tratarJogada(Mao mao, Rodada rodadaAtual, Mensagem<Jogada> jogada, Jogador jogador1, Jogador jogador2) throws IOException, ClassNotFoundException {
+        rodadaAtual.getJogadas().add(jogada.getValor());
         boolean aceitou;
         switch (jogada.getValor().getAcaoDaJogada()) {
             case JOGADA_SIMPLES:

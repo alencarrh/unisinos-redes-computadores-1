@@ -1,5 +1,6 @@
 package jogo;
 
+import comunicacao.transporte.MaoInfo;
 import enums.EstadoDaMao;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -60,6 +61,10 @@ public class Mao implements Serializable {
 
     public void setJogadorTrocouEstado(Jogador jogadorTrocouEstado) {
         this.jogadorTrocouEstado = jogadorTrocouEstado;
+    }
+
+    public MaoInfo getInfoMao() {
+        return new MaoInfo(this);
     }
 
 }

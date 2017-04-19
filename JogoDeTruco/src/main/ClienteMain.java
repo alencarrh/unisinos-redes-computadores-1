@@ -4,6 +4,7 @@ import comunicacao.ControladorConexao;
 import comunicacao.Mensagem;
 import comunicacao.transporte.Info;
 import comunicacao.transporte.JogadorInfo;
+import comunicacao.transporte.MaoInfo;
 import comunicacao.transporte.MenuAcoes;
 import comunicacao.transporte.PartidaInfo;
 import comunicacao.transporte.PartidasInfo;
@@ -97,6 +98,8 @@ public class ClienteMain {
             case DADOS_RODADA:
                 mostrarDadosRodada(msg);
                 break;
+            case DADOS_MAO:
+                mostrarDadosDaMao(msg);
             case INFO_JOGADA_OPONENTE:
                 mostrarJogadaAnterior(msg);
                 break;
@@ -190,26 +193,31 @@ public class ClienteMain {
 
             if (r.getJogadorGanhador() != null) {
                 if (r.getJogadorGanhador().getNomeJogador().equals(jogador.getNomeJogador())) {
-                    System.out.println("\nVocê ganhou esta rodada!");
+                    System.out.println("\nVocê ganhou esta rodada!\n\n");
                 } else {
+                    String temp = r.getUtilmaJogadaDoJogador(r.getJogadorGanhador()) != null ? r.getUtilmaJogadaDoJogador(r.getJogadorGanhador()).getAcaoRealizada() + " e " : "";
                     System.out.println("\n"
                             + r.getJogadorGanhador().getNomeJogador()
                             + " "
-                            + r.getUtilmaJogadaDoJogador(r.getJogadorGanhador()).getAcaoRealizada()
-                            + " e ganhou a rodada");
+                            + temp
+                            + " ganhou a rodada\n\n");
                 }
             } else {
                 Jogada ultimaJogada = r.getJogadas().get(r.getJogadas().size() - 1);
                 System.out.println(ultimaJogada.getJogadorInfo().getNomeJogador() + "\n" + ultimaJogada.getAcaoRealizada());
             }
         } catch (Exception e) {
-            System.out.println("\nDeu erro: " + e.getMessage());
+            System.out.println("\nDeu erro: " + e.getMessage() + "\n\n");
         }
 
     }
 
     private static void informarPerdaConexao(Mensagem<Info> msg) {
         System.out.println("\n" + msg.getValor().getInformacao() + "\n");
+    }
+
+    private static void mostrarDadosDaMao(Mensagem<MaoInfo> msg) {
+        System.out.println("POR FAZER.......");
     }
 
 }
