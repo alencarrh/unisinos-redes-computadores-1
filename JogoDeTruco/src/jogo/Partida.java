@@ -2,13 +2,9 @@ package jogo;
 
 import comunicacao.Mensagem;
 import comunicacao.transporte.Info;
-import comunicacao.transporte.JogadorInfo;
-import comunicacao.transporte.MenuAcoes;
 import comunicacao.transporte.PartidaInfo;
 import comunicacao.transporte.RodadaInfo;
-import enums.AcaoDaJogada;
 import enums.AcaoDaMensagem;
-import enums.Carta;
 import enums.StatusDaPartida;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -72,17 +68,9 @@ public class Partida extends Thread {
         return new PartidaInfo(this.idPartida, this.nomePartida, this.jogadores.get(0), this.jogadores.get(1));
     }
 
-    public synchronized void start(Jogador jogador) {
-        if (this.jogadores.isEmpty() || !StatusDaPartida.AGUARDANDO_JOGADOR.equals(this.status)) {
-            throw new IllegalStateException("Partida não está AGUARDANDO_JOGADOR. É necessário a existência de dois jogadores para a partida poder iniciar.");
-        }
-        this.jogadores.add(jogador);
-        super.start();
-    }
-
     @Override
     public int hashCode() {
-        int hash = 5;
+        int hash = idPartida.intValue();
         return hash;
     }
 
@@ -101,6 +89,19 @@ public class Partida extends Thread {
         return Objects.equals(this.idPartida, other.idPartida);
     }
 
+    /**
+     * Inicia a partida
+     *
+     * @param jogador
+     */
+    public synchronized void start(Jogador jogador) {
+        if (this.jogadores.isEmpty() || !StatusDaPartida.AGUARDANDO_JOGADOR.equals(this.status)) {
+            throw new IllegalStateException("Partida não está AGUARDANDO_JOGADOR. É necessário a existência de dois jogadores para a partida poder iniciar.");
+        }
+        this.jogadores.add(jogador);
+        super.start();
+    }
+
     @Override
     public void run() {
         this.status = StatusDaPartida.EM_ANDAMENTO;
@@ -113,7 +114,9 @@ public class Partida extends Thread {
                 Logger.getLogger(Partida.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
+
         boolean semErros = true;
+
         while (this.jogadores.get(0).getConexao().isConectionOpen() && this.jogadores.get(1).getConexao().isConectionOpen() && StatusDaPartida.EM_ANDAMENTO.equals(this.status) && semErros) {
             try {
                 Mao maoAtual = new Mao();
@@ -123,6 +126,9 @@ public class Partida extends Thread {
                     iniciarMao(maoAtual, jogadores.get(0), jogadores.get(1));
                 }
                 maos.add(maoAtual);
+                if (existeGanhadorPartida()) {
+                    finalizarPartida();
+                }
             } catch (IOException | ClassNotFoundException ex) {
                 Logger.getLogger(Partida.class.getName()).log(Level.SEVERE, null, ex);
                 semErros = false;
@@ -130,23 +136,12 @@ public class Partida extends Thread {
         }
         if (semErros) {
             informarPlacarFinal();
+            //Reinicia o JogadorListener de ambos jogadores (para voltarem ao menu principal)
             Servidor.iniciarJogadorListener(jogadores.get(0));
             Servidor.iniciarJogadorListener(jogadores.get(1));
         } else {
             informarJogadoresPerdaConexao();
         }
-    }
-
-    /**
-     * Envia as cartas para o jogador
-     *
-     * @param jogador
-     * @throws IOException
-     */
-    private void enviarCartas(Jogador jogador) throws IOException {
-        Mensagem<JogadorInfo> msg = new Mensagem<>(AcaoDaMensagem.MOSTRAR_CARTAS, new JogadorInfo(jogador));
-        Util.printarEnvioInfo(jogador, msg);
-        jogador.getConexao().enviar(msg);
     }
 
     /**
@@ -160,105 +155,80 @@ public class Partida extends Thread {
      */
     private void iniciarMao(Mao mao, Jogador jogador1, Jogador jogador2) throws IOException, ClassNotFoundException {
         Jogo.darCartas(jogador1, jogador2);
-        enviarCartas(jogador1);
-        enviarCartas(jogador2);
-        Mensagem msgFromJogador1 = null, msgFromJogador2 = null;
-        while (mao.getJogadorGanhador() == null) {//Enquanto a mão não tiver um ganhador.
+        Jogo.enviarCartas(jogador1);
+        Jogo.enviarCartas(jogador2);
+        Mensagem<Jogada> msgJogadaJogador1, msgJogadaJogador2;
+
+        //Enquanto a mão não tiver um ganhador.
+        while (mao.getJogadorGanhador() == null) {
             Rodada rodadaAtual = new Rodada();
+            mao.getRodadas().add(rodadaAtual);
+            //Enquanto a rodada não tiver um ganhador
+            while (rodadaAtual.getJogadorGanhador() == null) {
+                msgJogadaJogador1 = realizarJogada(mao, rodadaAtual, jogador1, jogador2, null);
 
-            while (rodadaAtual.getJogadorGanhador() == null) {//Enquanto a rodada não tiver um ganhador
-                enviarDadosJogada(jogador1, jogador2, mao, msgFromJogador2);
-                msgFromJogador1 = jogador1.getConexao().receber();
-                //TODO: enquanto não for jogada simples, não segue para segundo jogador.
-                // Isto é: se for chamado Envido,RealEnvido,FaltaEnvido, deve-se
-                // abrir um fluxo separado para tratar o está chama, pois as validações
-                // se modificam das atuais.
-                // A visão do cliente não mudará muito da atual, somente o servidor terá que mudar a fluxo
-                // de execução de tratamento.
-                Util.printarRecebimentoInfo(jogador1, msgFromJogador1);
+                //Verificação para caso o jogador1 IR_PARA_BARALHO
+                if (rodadaAtual.getJogadorGanhador() == null) {
+                    msgJogadaJogador2 = realizarJogada(mao, rodadaAtual, jogador2, jogador1, msgJogadaJogador1);
+                } else {
+                    jogador2.addTentos(mao.getEstadoDaMao().getValorDoEstado());
+                    //Inverter jogador1 e jogador2 pois jogador2 venceu está rodada
+                    Jogador temp = jogador1;
+                    jogador1 = jogador2;
+                    jogador2 = temp;
+                    break;
+                }
 
-                enviarDadosJogada(jogador2, jogador1, mao, msgFromJogador1);
-                msgFromJogador2 = jogador2.getConexao().receber();
-                Util.printarRecebimentoInfo(jogador2, msgFromJogador2);
-
-                calcularGanhadorRodada(mao, rodadaAtual, jogador1, jogador2, msgFromJogador1, msgFromJogador2);
+                //Verificação para caso o jogador2 IR_PARA_BARALHO
                 if (rodadaAtual.getJogadorGanhador() != null) {
-                    msgFromJogador1 = msgFromJogador2 = null;
-                    if (jogador2.equals(rodadaAtual.getJogadorGanhador())) {
-                        //Se o jogador2 ganhar a rodada, ele deverá começar a próxima. 
-                        //Logo ele passa a ser o jogador1
-                        Jogador temp = jogador1;
-                        jogador1 = jogador2;
-                        jogador2 = temp;
-                    }
+                    //Indica que o jogador2 correu. Segue para próxima rodada.
+                    continue;
+                }
+
+                //Neste momento, é garantido que ambas jogadas foram JOGADAS_SIMPLES
+                Jogo.calcularGanhadorRodada(mao, rodadaAtual, jogador1, jogador2, msgJogadaJogador1, msgJogadaJogador2);
+
+                if (existeGanhadorPartida()) {
+                    //Retorna para o while principal
+                    return;
+                }
+
+                //Aqui já deve-se, obrigatóriamente ter um ganhador
+                if (jogador2.equals(rodadaAtual.getJogadorGanhador())) {
+                    //Se o jogador2 ganhar a rodada, ele deverá começar a próxima. 
+                    //Logo ele passa a ser o jogador1
+                    Jogador temp = jogador1;
+                    jogador1 = jogador2;
+                    jogador2 = temp;
                 }
             }
-            enviarDadosFinalRodada(rodadaAtual);
+            enviarDadosRodada(rodadaAtual);
             calcularGanhadorDaMao(rodadaAtual, mao);
+            if (existeGanhadorPartida()) {
+                //Retorna para o while principal
+                return;
+            }
         }
+    }
+
+    public Mensagem<Jogada> realizarJogada(Mao mao, Rodada rodadaAtual, Jogador jogador1, Jogador jogador2, Mensagem<Jogada> jogadaAnterior) throws IOException, ClassNotFoundException {
+        Mensagem<Jogada> jogadaDesteJogador;
+        boolean vezDesteJogador;
+        do {
+            Jogo.enviarDadosJogada(jogador1, jogador2, mao, jogadaAnterior);
+            jogadaDesteJogador = jogador1.getConexao().receber();
+            Util.printarRecebimentoInfo(jogador1, jogadaDesteJogador);
+            vezDesteJogador = Jogo.tratarJogada(mao, rodadaAtual, jogadaDesteJogador, jogador1, jogador2);
+        } while (vezDesteJogador);
+        return jogadaDesteJogador;
     }
 
     /**
-     * Envia os dados(Opções de jogada) para o jogador que está na vez
-     * informando o outro jogador para aguardar.
+     * Envia os dados da rodada para os jogadores.
      *
-     * @param jogadorQueVaiJogar
-     * @param jogadorParaAguardar
-     * @param mao
-     * @param msgOutroJogador
-     * @throws IOException
+     * @param rodadaAtual
      */
-    private void enviarDadosJogada(Jogador jogadorQueVaiJogar, Jogador jogadorParaAguardar, Mao mao, Mensagem<Jogada> msgOutroJogador) throws IOException {
-        jogadorQueVaiJogar.getConexao().enviar(montarMenuJogador(mao, jogadorQueVaiJogar, msgOutroJogador));
-        jogadorParaAguardar.getConexao().enviar(new Mensagem(AcaoDaMensagem.AGUARDAR_OUTRO_JOGADOR, null));
-    }
-
-    /**
-     * Monta o menu com opções de jogadas que o jogador pode realizar
-     *
-     * @param mao
-     * @param jogador
-     * @param msgOutraJogada
-     * @return
-     */
-    private Mensagem<MenuAcoes> montarMenuJogador(Mao mao, Jogador jogador, Mensagem<Jogada> msgOutraJogada) {
-        MenuAcoes menu = new MenuAcoes(msgOutraJogada == null ? null : msgOutraJogada.getValor());
-        List<Jogada> jogadasPossiveis = new ArrayList<>();
-        if (msgOutraJogada == null) {
-            montarMenuSimples(mao, jogador, jogadasPossiveis);
-        } else {
-            montarMenuComplexo(mao, jogador, jogadasPossiveis, msgOutraJogada.getValor());
-        }
-        jogadasPossiveis.add(new Jogada(AcaoDaJogada.IR_PARA_BARALHO, null));
-        menu.getJogadas().addAll(jogadasPossiveis);
-        return new Mensagem<>(AcaoDaMensagem.JOGAR, menu);
-    }
-
-    private void calcularGanhadorRodada(Mao mao, Rodada rodadaAtual, Jogador jogador1, Jogador jogador2, Mensagem<Jogada> msgFromJogador1, Mensagem<Jogada> msgFromJogador2) {
-        Jogada jogada1 = msgFromJogador1.getValor();
-        Jogada jogada2 = msgFromJogador2.getValor();
-        rodadaAtual.getJogadas().add(jogada1);
-        rodadaAtual.getJogadas().add(jogada2);
-        boolean mesmaAcao = jogada1.getAcaoDaJogada().equals(jogada2.getAcaoDaJogada());
-        switch (jogada1.getAcaoDaJogada()) {
-            case JOGADA_SIMPLES:
-                if (mesmaAcao) {
-                    jogador1.getCartas().remove(jogada1.getCarta());
-                    jogador2.getCartas().remove(jogada2.getCarta());
-                    calculaGanhadorJogadaSimples(rodadaAtual, jogador1, jogador2, jogada1.getCarta(), jogada2.getCarta());
-                }
-        }
-    }
-
-    private void calculaGanhadorJogadaSimples(Rodada rodadaAtual, Jogador jogador1, Jogador jogador2, Carta carta1, Carta carta2) {
-        if (carta1.getRanking() >= carta2.getRanking()) {
-            rodadaAtual.setJogadorGanhador(jogador1);
-        } else {
-            rodadaAtual.setJogadorGanhador(jogador2);
-        }
-    }
-
-    private void enviarDadosFinalRodada(Rodada rodadaAtual) {
+    private void enviarDadosRodada(Rodada rodadaAtual) {
         jogadores.forEach(jogador -> {
             try {
                 Mensagem<RodadaInfo> msg = new Mensagem<>(AcaoDaMensagem.DADOS_RODADA, rodadaAtual.getInfoRodada());
@@ -275,98 +245,35 @@ public class Partida extends Thread {
     }
 
     /**
-     * Monta o menu baseado nas cartas e no estado da mao. Não considera a
-     * jogada anterior.
-     *
-     * @param mao
-     * @param jogador
-     * @param jogadasPossiveis
+     * Envia as informações de ganhador e perdedor junto com demais informações
+     * da partida para todos os jogadores.
      */
-    private void montarMenuSimples(Mao mao, Jogador jogador, List<Jogada> jogadasPossiveis) {
-        jogador.getCartas().stream().forEach((carta) -> {
-            jogadasPossiveis.add(new Jogada(AcaoDaJogada.JOGADA_SIMPLES, carta, jogador.getInfoJogador()));
-        });
-        if (Jogo.podeChamarTruco(mao)) {
-            jogadasPossiveis.add(new Jogada(AcaoDaJogada.TRUCO, null, jogador.getInfoJogador()));
-        } else if (Jogo.podeChamarRetruco(mao)) {
-            jogadasPossiveis.add(new Jogada(AcaoDaJogada.RETRUCO, null, jogador.getInfoJogador()));
-        } else if (Jogo.podeChamarValeQuatro(mao)) {
-            jogadasPossiveis.add(new Jogada(AcaoDaJogada.VALE_QUATRO, null, jogador.getInfoJogador()));
-        }
-        if (Jogo.podeChamarEnvido(mao, jogador)) {
-            jogadasPossiveis.add(new Jogada(AcaoDaJogada.ENVIDO, null, jogador.getInfoJogador()));
-            jogadasPossiveis.add(new Jogada(AcaoDaJogada.REAL_ENVIDO, null, jogador.getInfoJogador()));
-            jogadasPossiveis.add(new Jogada(AcaoDaJogada.FALTA_ENVIDO, null, jogador.getInfoJogador()));
-        }
-        if (Jogo.podeChamarFlor(mao, jogador)) {
-            jogadasPossiveis.add(new Jogada(AcaoDaJogada.FLOR, null, jogador.getInfoJogador()));
-        }
+    private void informarPlacarFinal() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     /**
-     * Monta o menu de opções baseado na jogada anterior do outro jogador.
+     * Verifica se já existe um jogador com a pontuação necessária para ganhar a
+     * partida.
      *
-     * @param mao
-     * @param jogador
-     * @param jogadasPossiveis
-     * @param jogadaAnterior
+     * @return
      */
-    private void montarMenuComplexo(Mao mao, Jogador jogador, List<Jogada> jogadasPossiveis, Jogada jogadaAnterior) {
-        if (jogadaAnterior == null) {
-            montarMenuSimples(mao, jogador, jogadasPossiveis);
-            return;
-        }
-        switch (jogadaAnterior.getAcaoDaJogada()) {
-            case JOGADA_SIMPLES:
-                montarMenuSimples(mao, jogador, jogadasPossiveis);
-                return;
-            case TRUCO:
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null, jogador.getInfoJogador()));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null, jogador.getInfoJogador()));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.RETRUCO, null, jogador.getInfoJogador()));
-                return;
-            case RETRUCO:
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null, jogador.getInfoJogador()));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null, jogador.getInfoJogador()));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.VALE_QUATRO, null, jogador.getInfoJogador()));
-                return;
-            case VALE_QUATRO:
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null, jogador.getInfoJogador()));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null, jogador.getInfoJogador()));
-                return;
-            case ENVIDO:
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null, jogador.getInfoJogador()));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null, jogador.getInfoJogador()));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.REAL_ENVIDO, null, jogador.getInfoJogador()));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.FALTA_ENVIDO, null, jogador.getInfoJogador()));
-                return;
-            case REAL_ENVIDO:
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null, jogador.getInfoJogador()));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null, jogador.getInfoJogador()));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.FALTA_ENVIDO, null, jogador.getInfoJogador()));
-                return;
-            case FALTA_ENVIDO:
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null, jogador.getInfoJogador()));
-                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null, jogador.getInfoJogador()));
-                return;
-            case FLOR:
-                if (Jogo.podeChamarContraFlor(mao, jogador)) {
-                    jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null, jogador.getInfoJogador()));
-                    jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null, jogador.getInfoJogador()));
-                    jogadasPossiveis.add(new Jogada(AcaoDaJogada.CONTRA_FLOR, null, jogador.getInfoJogador()));
-                    jogadasPossiveis.add(new Jogada(AcaoDaJogada.CONTRA_FLOR_E_RESTO, null, jogador.getInfoJogador()));
-                } else {
-                    jogadasPossiveis.add(new Jogada(AcaoDaJogada.BOA, null, jogador.getInfoJogador()));
-                }
-                return;
-
-        }
+    private boolean existeGanhadorPartida() {
+        return jogadores.stream().anyMatch((jogador) -> (jogador.getTentos() >= 24));
     }
 
-    private void informarPerdaDeConexao(Jogador jogador) throws IOException {
-        jogador.getConexao().enviar(new Mensagem<>(AcaoDaMensagem.INFORMAR_PERDA_CONEXAO, new Info("O outro jogador perdeu a conexão com a partida...")));
+    /**
+     * Finaliza a partida trocando seu status para FINALIZADA.
+     */
+    private void finalizarPartida() {
+        this.status = StatusDaPartida.FINALIZADA;
     }
 
+    /**
+     * Verifica os usuários conectados e envia mensagem que foi perdido a
+     * conexão com o outro usuário, reiniciando a sua thread principal para
+     * voltar ao menu principal.
+     */
     private void informarJogadoresPerdaConexao() {
         try {
             if (jogadores.get(0).getConexao().isConectionOpen()) {
@@ -391,8 +298,7 @@ public class Partida extends Thread {
         }
     }
 
-    private void informarPlacarFinal() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private void informarPerdaDeConexao(Jogador jogador) throws IOException {
+        jogador.getConexao().enviar(new Mensagem<>(AcaoDaMensagem.INFORMAR_PERDA_CONEXAO, new Info("O outro jogador perdeu a conexão com a partida...")));
     }
-
 }

@@ -61,7 +61,7 @@ public class Jogada implements Serializable {
 
     @Override
     public String toString() {
-        return "Jogada{" + "acaoDaJogada=" + acaoDaJogada + ", carta=" + carta + '}';
+        return "Jogada{" + "acaoDaJogada=" + acaoDaJogada + ", carta=" + carta + ", jogadorInfo=" + jogadorInfo + '}';
     }
 
 }

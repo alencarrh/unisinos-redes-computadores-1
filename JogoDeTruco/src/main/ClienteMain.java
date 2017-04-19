@@ -16,6 +16,7 @@ import java.io.InvalidObjectException;
 import java.util.List;
 import jogo.Jogada;
 import jogo.Jogador;
+import util.Util;
 
 /**
  * @class ClienteMain
@@ -33,7 +34,8 @@ public class ClienteMain {
         iniciarInformacoesSobreJogador();
         atualizarDadosJogador();
 
-        carregarSalasDisponiveis();
+        requisitarSalasDisponiveis();
+        Util.limparCMD();
         while (conexao.isConectionOpen()) {
             Mensagem msg = conexao.receber();
             tratarMensagem(msg);
@@ -71,7 +73,7 @@ public class ClienteMain {
         }
     }
 
-    private static void carregarSalasDisponiveis() throws IOException {
+    private static void requisitarSalasDisponiveis() throws IOException {
         conexao.enviar(new Mensagem<>(AcaoDaMensagem.LISTAR_PARTIDAS, null));
     }
 
@@ -95,14 +97,16 @@ public class ClienteMain {
             case DADOS_RODADA:
                 mostrarDadosRodada(msg);
                 break;
+            case INFO_JOGADA_OPONENTE:
+                mostrarJogadaAnterior(msg);
+                break;
             case INFORMAR_PERDA_CONEXAO:
                 informarPerdaConexao(msg);
-                carregarSalasDisponiveis();
+                requisitarSalasDisponiveis();
                 break;
             case FINALIZAR_CONEXAO:
                 conexao.close();
                 break;
-
         }
     }
 
@@ -130,13 +134,13 @@ public class ClienteMain {
                 System.out.println("\nPartida criada... Aguardando outro jogador juntar-se a sua partida...\n");
                 break;
             case 2:
-                carregarSalasDisponiveis();
+                requisitarSalasDisponiveis();
                 break;
             default:
                 int pos = partidas.getPartidas().indexOf(new PartidaInfo(id, null, null));
                 if (pos == -1) {
                     System.out.println("Opção inválida!");
-                    carregarSalasDisponiveis();
+                    requisitarSalasDisponiveis();
                 } else {
                     conexao.enviar(new Mensagem<>(AcaoDaMensagem.ESCOLHER_PARTIDA, partidas.getPartidas().get(pos)));
                     System.out.println("\nConectando-se a partida de " + partidas.getPartidas().get(pos).getNomePartida() + "...\n");
@@ -159,7 +163,6 @@ public class ClienteMain {
     }
 
     private static void jogar(Mensagem<MenuAcoes> msg) throws IOException {
-        mostrarJogadaAnterior(msg.getValor().getJogadaAnterior());
         System.out.println("\nJogadas: ");
         List<Jogada> jogadas = msg.getValor().getJogadas();
         for (int i = 0; i < jogadas.size(); i++) {
@@ -170,30 +173,37 @@ public class ClienteMain {
         //TODO: validar jogada
         Integer op = new Integer(opJogada) - 1;
         conexao.enviar(new Mensagem<>(AcaoDaMensagem.JOGAR, jogadas.get(op)));
+        System.out.println("\nVocê " + jogadas.get(op).getAcaoRealizada() + "\n");
     }
 
-    private static void mostrarJogadaAnterior(Jogada jogadaAnterior) {
-        if (jogadaAnterior == null) {
+    private static void mostrarJogadaAnterior(Mensagem<Jogada> msgJogadaAnterior) {
+        if (msgJogadaAnterior == null || msgJogadaAnterior.getValor() == null) {
             return;
         }
-        System.out.println("\n" + jogadaAnterior.getAcaoRealizada() + "\n");
+        Jogada jogadaAnterior = msgJogadaAnterior.getValor();
+        System.out.println("\n" + jogadaAnterior.getJogadorInfo().getNomeJogador() + ' ' + jogadaAnterior.getAcaoRealizada() + "\n");
     }
 
     private static void mostrarDadosRodada(Mensagem<RodadaInfo> msg) {
-        RodadaInfo r = msg.getValor();
-        if (r.getJogadorGanhador() != null) {
-            if (r.getJogadorGanhador().getNomeJogador().equals(jogador.getNomeJogador())) {
-                System.out.println("\nVocê ganhou esta rodada!");
+        try {
+            RodadaInfo r = msg.getValor();
+
+            if (r.getJogadorGanhador() != null) {
+                if (r.getJogadorGanhador().getNomeJogador().equals(jogador.getNomeJogador())) {
+                    System.out.println("\nVocê ganhou esta rodada!");
+                } else {
+                    System.out.println("\n"
+                            + r.getJogadorGanhador().getNomeJogador()
+                            + " "
+                            + r.getUtilmaJogadaDoJogador(r.getJogadorGanhador()).getAcaoRealizada()
+                            + " e ganhou a rodada");
+                }
             } else {
-                System.out.println("\n"
-                        + r.getJogadorGanhador().getNomeJogador()
-                        + " "
-                        + r.getUtilmaJogadaDoJogador(r.getJogadorGanhador()).getAcaoRealizada()
-                        + " e ganhou a rodada");
+                Jogada ultimaJogada = r.getJogadas().get(r.getJogadas().size() - 1);
+                System.out.println(ultimaJogada.getJogadorInfo().getNomeJogador() + "\n" + ultimaJogada.getAcaoRealizada());
             }
-        } else {
-            Jogada ultimaJogada = r.getJogadas().get(r.getJogadas().size() - 1);
-            System.out.println(ultimaJogada.getJogadorInfo().getNomeJogador() + "\n" + ultimaJogada.getAcaoRealizada());
+        } catch (Exception e) {
+            System.out.println("\nDeu erro: " + e.getMessage());
         }
 
     }

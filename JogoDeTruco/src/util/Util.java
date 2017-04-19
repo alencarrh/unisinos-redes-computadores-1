@@ -1,6 +1,7 @@
 package util;
 
 import comunicacao.Mensagem;
+import java.io.IOException;
 import java.util.Random;
 import jogo.Jogador;
 
@@ -63,6 +64,13 @@ public class Util {
 
     public static void printarRecebimentoInfo(Jogador jogador, Mensagem msg) {
         System.out.println("Servidor recebeu(#" + jogador.getNomeJogador() + "): " + msg);
+    }
+
+    public static void limparCMD() {
+        try {
+            new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+        } catch (IOException | InterruptedException ex) {
+        }
     }
 
 }

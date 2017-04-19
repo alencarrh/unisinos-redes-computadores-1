@@ -35,7 +35,8 @@ public class JogadorListener extends Thread implements Serializable {
     }
 
     /**
-     * Inicia a thread que faz o controle de uma conexão especifica.
+     * Inicia a thread que faz o controle de uma conexão especifica(de um
+     * jogador).
      */
     @Override
     public void run() {
@@ -55,7 +56,7 @@ public class JogadorListener extends Thread implements Serializable {
 
     @Override
     public int hashCode() {
-        int hash = 3;
+        int hash = this.jogador.getIdJogador().intValue();
         return hash;
     }
 

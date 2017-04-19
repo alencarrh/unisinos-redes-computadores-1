@@ -30,6 +30,11 @@ public class Servidor implements Serializable {
         this.nextJogadorId = new Long(1);
     }
 
+    /**
+     * Inicia o servidor.
+     *
+     * @throws IOException
+     */
     public void iniciarServidor() throws IOException {
         if (isRodando()) {
             return;
@@ -49,6 +54,12 @@ public class Servidor implements Serializable {
         }
     }
 
+    /**
+     * Reinicia o JogadorListener do jogador para voltar a ouvi-lo do menu
+     * principal.
+     *
+     * @param jogador
+     */
     public static synchronized void iniciarJogadorListener(Jogador jogador) {
         JogadorListener novoJogadorListener = new JogadorListener(jogador);
         removerJogadorListener(jogador);
@@ -56,11 +67,22 @@ public class Servidor implements Serializable {
         JOGADORES.add(novoJogadorListener);
     }
 
+    /**
+     * Remove o jogador(JogadorListener) da lista de jogadores.
+     *
+     * @param jogador
+     */
     public static synchronized void removerJogadorListener(Jogador jogador) {
         JOGADORES.remove(new JogadorListener(jogador));
     }
 
-    public void pararServidor() throws IOException {
+    /**
+     * Interrompe todos os JogadoresListener(fecha a conexão do socket) e
+     * interrompe o servidor.
+     *
+     * @throws IOException
+     */
+    public synchronized void pararServidor() throws IOException {
         JOGADORES.stream().forEach(JogadorListener::interrupt);
         this.serverSocket.close();
     }
@@ -69,6 +91,11 @@ public class Servidor implements Serializable {
         return rodando;
     }
 
+    /**
+     * Obtém o ID para um novo jogador.
+     *
+     * @return
+     */
     public synchronized Long getNextJogadorId() {
         return this.nextJogadorId++;
     }
