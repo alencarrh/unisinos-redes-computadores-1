@@ -154,6 +154,7 @@ public class ClienteMain {
     }
 
     private static void iniciarPartida(Mensagem<PartidaInfo> msg) {
+        Util.limparCMD();
         System.out.println(msg.getValor().getJogador1().getNomeJogador() + " vs " + msg.getValor().getJogador2().getNomeJogador());
         System.out.println("\nIniciado partida...\n");
     }
@@ -177,6 +178,7 @@ public class ClienteMain {
         //TODO: validar jogada
         Integer op = new Integer(opJogada) - 1;
         conexao.enviar(new Mensagem<>(AcaoDaMensagem.JOGAR, jogadas.get(op)));
+        Util.limparCMD();
         System.out.println("\nVocê " + jogadas.get(op).getAcaoRealizada() + "\n");
     }
 
@@ -223,14 +225,19 @@ public class ClienteMain {
             System.out.println("Rodadas anteriores: ");
             for (int i = 0; i < maoInfo.getRodadas().size(); i++) {
                 RodadaInfo rodada = maoInfo.getRodadas().get(i);
-                System.out.println("-Rodada " + (i + 1));
+                System.out.println("-Rodada " + (i + 1) + "");
                 for (int j = 0; j < rodada.getJogadas().size(); j++) {
                     Jogada jogada = rodada.getJogadas().get(j);
-                    System.out.println("-->Jodada " + (i + 1) + ": " + jogada.getJogadorInfo().getNomeJogador() + " " + jogada.getAcaoRealizada());
+                    System.out.println("-->Jodada " + (j + 1) + ": " + jogada.getJogadorInfo().getNomeJogador() + " " + jogada.getAcaoRealizada());
                 }
+                System.out.println("Ganhador: " + rodada.getJogadorGanhador().getNomeJogador());
+            }
+            if (maoInfo.getJogadorGanhador() != null) {
+                System.out.println("\nGanhador da Mao: " + maoInfo.getJogadorGanhador().getNomeJogador());
             }
         }
-        System.out.println("Rodada número: " + (maoInfo.getRodadas().size() + 1));
+
+        System.out.println("\n\nIniciando rodada número: " + (maoInfo.getRodadas().size() + 1));
 
     }
 

@@ -19,6 +19,8 @@ import jogo.Jogador;
  */
 public class Servidor implements Serializable {
 
+    //TODO: não deve ser static pois pode-se ter mais de um servidor executando ao mesmo
+    //tempo em uma porta diferente. Alterar isto.
     private static final List<JogadorListener> JOGADORES = new ArrayList<>();
     private Long nextJogadorId;
     private final ServerSocket serverSocket;

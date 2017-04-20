@@ -233,8 +233,6 @@ public class Jogo {
     public static void calcularGanhadorRodada(Mao mao, Rodada rodadaAtual, Jogador jogador1, Jogador jogador2, Mensagem<Jogada> msgFromJogador1, Mensagem<Jogada> msgFromJogador2) {
         Jogada jogada1 = msgFromJogador1.getValor();
         Jogada jogada2 = msgFromJogador2.getValor();
-        rodadaAtual.getJogadas().add(jogada1);
-        rodadaAtual.getJogadas().add(jogada2);
         //Ambas jogadas serão JOGADAS_SIMPLES neste momento.
         jogador1.getCartas().remove(jogada1.getCarta());
         jogador2.getCartas().remove(jogada2.getCarta());
@@ -284,8 +282,10 @@ public class Jogo {
             case NAO_QUERO:
                 Jogo.definirGanhadorRodada(rodadaAtual, jogador2);
                 Jogo.definirGanhadorMao(mao, jogador2);
+                jogador2.getConexao().enviar(new Mensagem<>(AcaoDaMensagem.INFO_JOGADA_OPONENTE, jogada.getValor()));
                 return false;
             case QUERO:
+                jogador2.getConexao().enviar(new Mensagem<>(AcaoDaMensagem.INFO_JOGADA_OPONENTE, jogada.getValor()));
                 return false;
             case ENVIDO:
 //                return chamarEnvido(jogador1, jogador2);
@@ -362,14 +362,16 @@ public class Jogo {
         enviarDadosJogada(jogador2, jogador1, mao, jogada);
         Mensagem<Jogada> msgJogadaJogador2 = jogador2.getConexao().receber();
         Util.printarRecebimentoInfo(jogador2, msgJogadaJogador2);
-//        jogador1.getConexao().enviar(new Mensagem<>(AcaoDaMensagem.INFO_JOGADA_OPONENTE, msgJogadaJogador2.getValor()));
         switch (msgJogadaJogador2.getValor().getAcaoDaJogada()) {
             case QUERO:
                 Jogo.aceitouTruco(mao);
+                rodadaAtual.getJogadas().add(msgJogadaJogador2.getValor());
                 return true;
             case NAO_QUERO:
+                rodadaAtual.getJogadas().add(msgJogadaJogador2.getValor());
                 return false;
             case IR_PARA_BARALHO:
+                rodadaAtual.getJogadas().add(msgJogadaJogador2.getValor());
                 return false;
             case RETRUCO:
                 Jogo.aceitouTruco(mao);
@@ -393,7 +395,7 @@ public class Jogo {
         enviarDadosJogada(jogador2, jogador1, mao, jogada);
         Mensagem<Jogada> msgJogadaJogador2 = jogador2.getConexao().receber();
         Util.printarRecebimentoInfo(jogador2, msgJogadaJogador2);
-//        jogador1.getConexao().enviar(new Mensagem<>(AcaoDaMensagem.INFO_JOGADA_OPONENTE, msgJogadaJogador2.getValor()));
+        rodadaAtual.getJogadas().add(msgJogadaJogador2.getValor());
         switch (msgJogadaJogador2.getValor().getAcaoDaJogada()) {
             case QUERO:
                 Jogo.aceitouRetruco(mao);
@@ -424,7 +426,7 @@ public class Jogo {
         enviarDadosJogada(jogador2, jogador1, mao, jogada);
         Mensagem<Jogada> msgJogadaJogador2 = jogador2.getConexao().receber();
         Util.printarRecebimentoInfo(jogador2, msgJogadaJogador2);
-//        jogador1.getConexao().enviar(new Mensagem<>(AcaoDaMensagem.INFO_JOGADA_OPONENTE, msgJogadaJogador2.getValor()));
+        rodadaAtual.getJogadas().add(msgJogadaJogador2.getValor());
         switch (msgJogadaJogador2.getValor().getAcaoDaJogada()) {
             case QUERO:
                 Jogo.aceitouValeQuatro(mao);
