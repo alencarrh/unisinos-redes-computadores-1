@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import servidor.Servidor;
 import util.Util;
 
@@ -25,8 +26,10 @@ import util.Util;
  */
 public class Partida extends Thread {
 
+    private static final int PONTUACAO_MAXIMA = 24;
     private final Long idPartida;
     private final String nomePartida;
+    private int indiceJogadorVencedor;
     private final List<Jogador> jogadores;
     private final List<Mao> maos;
 
@@ -43,6 +46,7 @@ public class Partida extends Thread {
         this.jogadores = new ArrayList<>();
         this.jogadores.add(primeiroJogador);
         this.status = StatusDaPartida.AGUARDANDO_JOGADOR;
+        this.indiceJogadorVencedor = -1;
     }
 
     public Long getIdPartida() {
@@ -61,11 +65,16 @@ public class Partida extends Thread {
         return status;
     }
 
+    public int getIndiceJogadorVencedor() {
+        return indiceJogadorVencedor;
+    }
+
+    public void setIndiceJogadorVencedor(int indiceJogadorVencedor) {
+        this.indiceJogadorVencedor = indiceJogadorVencedor;
+    }
+
     public PartidaInfo getInfoPartida() {
-        if (this.jogadores.size() == 1) {
-            return new PartidaInfo(this.idPartida, this.nomePartida, this.jogadores.get(0));
-        }
-        return new PartidaInfo(this.idPartida, this.nomePartida, this.jogadores.get(0), this.jogadores.get(1));
+        return new PartidaInfo(this);
     }
 
     @Override
@@ -290,7 +299,17 @@ public class Partida extends Thread {
      * da partida para todos os jogadores.
      */
     private void informarPlacarFinal() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Jogador jogadorGanhador = jogadores.stream().filter((jogador) -> (jogador.getTentos() >= PONTUACAO_MAXIMA)).collect(Collectors.toList()).get(0);
+        this.indiceJogadorVencedor = this.jogadores.indexOf(jogadorGanhador);
+        jogadores.forEach(jogador -> {
+            try {
+                Mensagem<PartidaInfo> msg = new Mensagem<>(AcaoDaMensagem.FINALIZAR_PARTIDA, this.getInfoPartida());
+                Util.printarEnvioInfo(jogador, msg);
+                jogador.getConexao().enviar(msg);
+            } catch (IOException ex) {
+                Logger.getLogger(Partida.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
     }
 
     /**
@@ -300,7 +319,7 @@ public class Partida extends Thread {
      * @return
      */
     private boolean existeGanhadorPartida() {
-        return jogadores.stream().anyMatch((jogador) -> (jogador.getTentos() >= 24));
+        return jogadores.stream().anyMatch((jogador) -> (jogador.getTentos() >= PONTUACAO_MAXIMA));
     }
 
     /**

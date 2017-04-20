@@ -107,6 +107,11 @@ public class ClienteMain {
             case PLACAR:
                 mostrarPlacar(msg);
                 break;
+            case FINALIZAR_PARTIDA:
+                finalizarPartida(msg);
+                System.out.println("\n\n\n");
+                requisitarSalasDisponiveis();
+                break;
             case INFORMAR_PERDA_CONEXAO:
                 informarPerdaConexao(msg);
                 requisitarSalasDisponiveis();
@@ -257,6 +262,13 @@ public class ClienteMain {
         System.out.print("   " + jogador1.getNomeJogador() + " " + jogador1.getTentos());
         System.out.print(" vs " + jogador2.getTentos() + " " + jogador2.getNomeJogador());
         System.out.println("\n");
+    }
+
+    private static void finalizarPartida(Mensagem<PartidaInfo> msg) {
+        System.out.println("****** FIM DA PARTIDA *****");
+        mostrarPlacar(msg);
+        System.out.println(">>>>GANHADOR: " + msg.getValor().getJogadorVencedor().getNomeJogador());
+
     }
 
 }
