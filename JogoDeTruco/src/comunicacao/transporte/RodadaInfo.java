@@ -14,10 +14,12 @@ public class RodadaInfo implements Serializable {
 
     private List<Jogada> jogadas;
     private JogadorInfo jogadorGanhador;
+    private boolean empatou;
 
     public RodadaInfo(Rodada rodada) {
         this.jogadas = rodada.getJogadas();
         this.jogadorGanhador = rodada.getJogadorGanhador() != null ? rodada.getJogadorGanhador().getInfoJogador() : null;
+        this.empatou = rodada.isEmpatou();
     }
 
     public RodadaInfo() {
@@ -46,6 +48,14 @@ public class RodadaInfo implements Serializable {
             }
         }
         return null;
+    }
+
+    public boolean isEmpatou() {
+        return empatou;
+    }
+
+    public void setEmpatou(boolean empatou) {
+        this.empatou = empatou;
     }
 
     @Override

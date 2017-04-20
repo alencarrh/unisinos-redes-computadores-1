@@ -4,7 +4,6 @@ import comunicacao.Mensagem;
 import comunicacao.transporte.Info;
 import comunicacao.transporte.MaoInfo;
 import comunicacao.transporte.PartidaInfo;
-import comunicacao.transporte.RodadaInfo;
 import enums.AcaoDaMensagem;
 import enums.StatusDaPartida;
 import java.io.IOException;
@@ -13,6 +12,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import servidor.Servidor;
 import util.Util;
 
@@ -26,8 +26,10 @@ import util.Util;
  */
 public class Partida extends Thread {
 
+    private static final int PONTUACAO_MAXIMA = 24;
     private final Long idPartida;
     private final String nomePartida;
+    private int indiceJogadorVencedor;
     private final List<Jogador> jogadores;
     private final List<Mao> maos;
 
@@ -44,6 +46,7 @@ public class Partida extends Thread {
         this.jogadores = new ArrayList<>();
         this.jogadores.add(primeiroJogador);
         this.status = StatusDaPartida.AGUARDANDO_JOGADOR;
+        this.indiceJogadorVencedor = -1;
     }
 
     public Long getIdPartida() {
@@ -62,11 +65,16 @@ public class Partida extends Thread {
         return status;
     }
 
+    public int getIndiceJogadorVencedor() {
+        return indiceJogadorVencedor;
+    }
+
+    public void setIndiceJogadorVencedor(int indiceJogadorVencedor) {
+        this.indiceJogadorVencedor = indiceJogadorVencedor;
+    }
+
     public PartidaInfo getInfoPartida() {
-        if (this.jogadores.size() == 1) {
-            return new PartidaInfo(this.idPartida, this.nomePartida, this.jogadores.get(0));
-        }
-        return new PartidaInfo(this.idPartida, this.nomePartida, this.jogadores.get(0), this.jogadores.get(1));
+        return new PartidaInfo(this);
     }
 
     @Override
@@ -123,7 +131,7 @@ public class Partida extends Thread {
                 Mao maoAtual = new Mao();
                 if ((maos.size() + 1) % 2 == 0) {//jogador 2 começa
                     iniciarMao(maoAtual, jogadores.get(1), jogadores.get(0));
-                } else {//jogador 2 começa
+                } else {//jogador 1 começa
                     iniciarMao(maoAtual, jogadores.get(0), jogadores.get(1));
                 }
                 maos.add(maoAtual);
@@ -172,7 +180,6 @@ public class Partida extends Thread {
                 if (rodadaAtual.getJogadorGanhador() == null) {
                     msgJogadaJogador2 = realizarJogada(mao, rodadaAtual, jogador2, jogador1, msgJogadaJogador1);
                 } else {
-                    jogador2.addTentos(mao.getEstadoDaMao().getValorDoEstado());
                     //Inverter jogador1 e jogador2 pois jogador2 venceu está rodada
                     Jogador temp = jogador1;
                     jogador1 = jogador2;
@@ -203,8 +210,11 @@ public class Partida extends Thread {
                     jogador2 = temp;
                 }
             }
-            calcularGanhadorDaMao(mao);
+            if (mao.getJogadorGanhador() == null) {
+                calcularGanhadorDaMao(mao);
+            }
             enviarDadosDaMao(mao);
+            enviarPlacar();
             if (existeGanhadorPartida()) {
                 //Retorna para o while principal
                 return;
@@ -242,7 +252,6 @@ public class Partida extends Thread {
     }
 
     private void calcularGanhadorDaMao(Mao mao) {
-        int rodadasGanhasJogador1 = 0, rodadasGanhasJogador2 = 0;
         //rodada atual vai ser adicionada na lista Mao.rodadas após 
         switch (mao.getRodadas().size()) {
             case 0:
@@ -252,27 +261,36 @@ public class Partida extends Thread {
             case 2:
                 if (mao.getRodadas().get(0).isEmpatou()) {
                     //Se empatou a 1ª rodada, o jogador que ganhar a 2ª vence.
-                    mao.setJogadorGanhador(mao.getRodadas().get(1).getJogadorGanhador());
+                    Jogo.definirGanhadorMao(mao, mao.getRodadas().get(1).getJogadorGanhador());
+//                    mao.setJogadorGanhador(mao.getRodadas().get(1).getJogadorGanhador());
                 }
+                //Verifica se um dos jogadores ganhou as duas primeiras rodadas
+                calcularJogadorGanhador(mao);
                 return;
             case 3:
                 if (mao.getRodadas().get(2).isEmpatou()) {
                     //Se empatou a 3ª rodada, o jogador que ganhou a 2ª vence.
-                    mao.setJogadorGanhador(mao.getRodadas().get(1).getJogadorGanhador());
+//                    mao.setJogadorGanhador(mao.getRodadas().get(1).getJogadorGanhador());
+                    Jogo.definirGanhadorMao(mao, mao.getRodadas().get(1).getJogadorGanhador());
                 }
-                for (Rodada rodada : mao.getRodadas()) {
-                    if (rodada.getJogadorGanhador().equals(jogadores.get(0))) {
-                        rodadasGanhasJogador1++;
-                    } else {
-                        rodadasGanhasJogador2++;
-                    }
-                }
-                //Jogador que ganhou mais rodadas vence
-                if (rodadasGanhasJogador1 > rodadasGanhasJogador2) {
-                    mao.setJogadorGanhador(jogadores.get(0));
-                } else {
-                    mao.setJogadorGanhador(jogadores.get(1));
-                }
+                calcularJogadorGanhador(mao);
+        }
+    }
+
+    private void calcularJogadorGanhador(Mao mao) {
+        int rodadasGanhasJogador1 = 0, rodadasGanhasJogador2 = 0;
+        for (Rodada rodada : mao.getRodadas()) {
+            if (rodada.getJogadorGanhador().equals(jogadores.get(0))) {
+                rodadasGanhasJogador1++;
+            } else {
+                rodadasGanhasJogador2++;
+            }
+        }
+        //Jogador que ganhou 2 rodadas vence
+        if (rodadasGanhasJogador1 == 2) {
+            Jogo.definirGanhadorMao(mao, jogadores.get(0));
+        } else if (rodadasGanhasJogador2 == 2) {
+            Jogo.definirGanhadorMao(mao, jogadores.get(1));
         }
     }
 
@@ -281,7 +299,17 @@ public class Partida extends Thread {
      * da partida para todos os jogadores.
      */
     private void informarPlacarFinal() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Jogador jogadorGanhador = jogadores.stream().filter((jogador) -> (jogador.getTentos() >= PONTUACAO_MAXIMA)).collect(Collectors.toList()).get(0);
+        this.indiceJogadorVencedor = this.jogadores.indexOf(jogadorGanhador);
+        jogadores.forEach(jogador -> {
+            try {
+                Mensagem<PartidaInfo> msg = new Mensagem<>(AcaoDaMensagem.FINALIZAR_PARTIDA, this.getInfoPartida());
+                Util.printarEnvioInfo(jogador, msg);
+                jogador.getConexao().enviar(msg);
+            } catch (IOException ex) {
+                Logger.getLogger(Partida.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
     }
 
     /**
@@ -291,7 +319,7 @@ public class Partida extends Thread {
      * @return
      */
     private boolean existeGanhadorPartida() {
-        return jogadores.stream().anyMatch((jogador) -> (jogador.getTentos() >= 24));
+        return jogadores.stream().anyMatch((jogador) -> (jogador.getTentos() >= PONTUACAO_MAXIMA));
     }
 
     /**
@@ -332,5 +360,17 @@ public class Partida extends Thread {
 
     private void informarPerdaDeConexao(Jogador jogador) throws IOException {
         jogador.getConexao().enviar(new Mensagem<>(AcaoDaMensagem.INFORMAR_PERDA_CONEXAO, new Info("O outro jogador perdeu a conexão com a partida...")));
+    }
+
+    private void enviarPlacar() {
+        jogadores.forEach(jogador -> {
+            try {
+                Mensagem<PartidaInfo> msg = new Mensagem<>(AcaoDaMensagem.PLACAR, this.getInfoPartida());
+                Util.printarEnvioInfo(jogador, msg);
+                jogador.getConexao().enviar(msg);
+            } catch (IOException ex) {
+                Logger.getLogger(Partida.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
     }
 }

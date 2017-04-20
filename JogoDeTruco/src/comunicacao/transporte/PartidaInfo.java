@@ -3,6 +3,7 @@ package comunicacao.transporte;
 import java.io.Serializable;
 import java.util.Objects;
 import jogo.Jogador;
+import jogo.Partida;
 
 /**
  * @class PartidaInfo
@@ -15,12 +16,14 @@ public class PartidaInfo implements Serializable {
     private final String nomePartida;
     private final JogadorInfo jogador1;
     private final JogadorInfo jogador2;
+    private final JogadorInfo jogadorVencedor;
 
     public PartidaInfo(Long idPartida, String nomePartida, Jogador jogador1) {
         this.idPartida = idPartida;
         this.nomePartida = nomePartida;
         this.jogador1 = jogador1 == null ? null : new JogadorInfo(jogador1);
         this.jogador2 = null;
+        this.jogadorVencedor = null;
     }
 
     public PartidaInfo(Long idPartida, String nomePartida, Jogador jogador1, Jogador jogador2) {
@@ -28,6 +31,15 @@ public class PartidaInfo implements Serializable {
         this.nomePartida = nomePartida;
         this.jogador1 = new JogadorInfo(jogador1);
         this.jogador2 = new JogadorInfo(jogador2);
+        this.jogadorVencedor = null;
+    }
+
+    public PartidaInfo(Partida partida) {
+        this.idPartida = partida.getIdPartida();
+        this.nomePartida = partida.getNomePartida();
+        this.jogador1 = partida.getJogadores().get(0).getInfoJogador();
+        this.jogador2 = partida.getJogadores().size() == 2 ? partida.getJogadores().get(1).getInfoJogador() : null;
+        this.jogadorVencedor = partida.getIndiceJogadorVencedor() == -1 ? null : partida.getIndiceJogadorVencedor() == 0 ? this.jogador1 : this.jogador2;
     }
 
     public Long getIdPartida() {
@@ -50,6 +62,10 @@ public class PartidaInfo implements Serializable {
     public int hashCode() {
         int hash = 3;
         return hash;
+    }
+
+    public JogadorInfo getJogadorVencedor() {
+        return jogadorVencedor;
     }
 
     @Override
