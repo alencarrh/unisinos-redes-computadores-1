@@ -20,34 +20,84 @@ import util.Util;
  */
 public class Jogo {
 
+    /**
+     * Atualiza Estado da mão para Truco.
+     *
+     * @param mao
+     */
     public static void aceitouTruco(Mao mao) {
         mao.setEstadoDaMao(EstadoDaMao.TRUCO);
     }
 
+    /**
+     * Atualiza Estado da mão para ReTruco.
+     *
+     * @param mao
+     */
     public static void aceitouRetruco(Mao mao) {
         mao.setEstadoDaMao(EstadoDaMao.RETRUCO);
     }
 
+    /**
+     * Atualiza Estado da mão para Vale-Quatro.
+     *
+     * @param mao
+     */
     public static void aceitouValeQuatro(Mao mao) {
         mao.setEstadoDaMao(EstadoDaMao.VALE_QUATRO);
     }
 
+    /**
+     * Verifica se o jogador pode chamar Truco.
+     *
+     * @param mao
+     * @param jogador
+     * @return
+     */
     public static boolean podeChamarTruco(Mao mao, Jogador jogador) {
         return EstadoDaMao.SIMPLES.equals(mao.getEstadoDaMao()) && mao.getJogadorTrocouEstado() == null;
     }
 
+    /**
+     * Verifica se o jogador pode chamar ReTruco.
+     *
+     * @param mao
+     * @param jogador
+     * @return
+     */
     public static boolean podeChamarRetruco(Mao mao, Jogador jogador) {
         return EstadoDaMao.TRUCO.equals(mao.getEstadoDaMao()) && !jogador.equals(mao.getJogadorTrocouEstado());
     }
 
+    /**
+     * Verifica se o jogador pode chamar Vale-Quatro.
+     *
+     * @param mao
+     * @param jogador
+     * @return
+     */
     public static boolean podeChamarValeQuatro(Mao mao, Jogador jogador) {
         return EstadoDaMao.RETRUCO.equals(mao.getEstadoDaMao()) && !jogador.equals(mao.getJogadorTrocouEstado());
     }
 
+    /**
+     * Verifica se o jogador pode chamar Envido/Real Envido/Falta Envido.
+     *
+     * @param mao
+     * @param jogador
+     * @return
+     */
     public static boolean podeChamarEnvido(Mao mao, Jogador jogador) {
         return jogador.getCartas().size() == 3 && !mao.isChamadoEnvido() && EstadoDaMao.SIMPLES.equals(mao.getEstadoDaMao());
     }
 
+    /**
+     * Verifica se o jogador pode chamar Flor.
+     *
+     * @param mao
+     * @param jogador
+     * @return
+     */
     public static boolean podeChamarFlor(Mao mao, Jogador jogador) {
         if (podeChamarEnvido(mao, jogador)) {
             List<Carta> cartas = jogador.getCartas();
@@ -57,10 +107,24 @@ public class Jogo {
         return false;
     }
 
+    /**
+     * Verifica se o jogador pode chamar Contra-Flor. Segue o mesmo tratamento
+     * da chamada de Flor normal.
+     *
+     * @param mao
+     * @param jogador
+     * @return
+     */
     public static boolean podeChamarContraFlor(Mao mao, Jogador jogador) {
         return podeChamarFlor(mao, jogador);
     }
 
+    /**
+     * Distribuí as cartas para os jogadores.
+     *
+     * @param jogador1
+     * @param jogador2
+     */
     public static void darCartas(Jogador jogador1, Jogador jogador2) {
         List<Carta> cartasJogador1 = new ArrayList<>();
         List<Carta> cartasJogador2 = new ArrayList<>();
@@ -259,15 +323,40 @@ public class Jogo {
         }
     }
 
+    /**
+     * Define o ganhador da mão e adiciona os tentos da mão para o jogador.
+     *
+     * @param mao
+     * @param jogadorGanhador
+     */
     public static void definirGanhadorMao(Mao mao, Jogador jogadorGanhador) {
         jogadorGanhador.addTentos(mao.getEstadoDaMao().getValorDoEstado());
         mao.setJogadorGanhador(jogadorGanhador);
     }
 
+    /**
+     * Define o ganhador da rodada
+     *
+     * @param rodada
+     * @param jogadorGanhador
+     */
     public static void definirGanhadorRodada(Rodada rodada, Jogador jogadorGanhador) {
         rodada.setJogadorGanhador(jogadorGanhador);
     }
 
+    /**
+     * Método principal encarregado de tratar as ações/jogadas principais dos
+     * jogadores.
+     *
+     * @param mao
+     * @param rodadaAtual
+     * @param jogada
+     * @param jogador1
+     * @param jogador2
+     * @return
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     public static boolean tratarJogada(Mao mao, Rodada rodadaAtual, Mensagem<Jogada> jogada, Jogador jogador1, Jogador jogador2) throws IOException, ClassNotFoundException {
         rodadaAtual.getJogadas().add(jogada.getValor());
         boolean aceitou;

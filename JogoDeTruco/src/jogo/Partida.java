@@ -4,7 +4,6 @@ import comunicacao.Mensagem;
 import comunicacao.transporte.Info;
 import comunicacao.transporte.MaoInfo;
 import comunicacao.transporte.PartidaInfo;
-import comunicacao.transporte.RodadaInfo;
 import enums.AcaoDaMensagem;
 import enums.StatusDaPartida;
 import java.io.IOException;
