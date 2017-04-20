@@ -232,7 +232,7 @@ public class Partida extends Thread {
     private void enviarDadosDaMao(Mao mao) {
         jogadores.forEach(jogador -> {
             try {
-                Mensagem<MaoInfo> msg = new Mensagem<>(AcaoDaMensagem.DADOS_RODADA, mao.getInfoMao());
+                Mensagem<MaoInfo> msg = new Mensagem<>(AcaoDaMensagem.DADOS_MAO, mao.getInfoMao());
                 Util.printarEnvioInfo(jogador, msg);
                 jogador.getConexao().enviar(msg);
             } catch (IOException ex) {

@@ -2,10 +2,9 @@ package comunicacao.transporte;
 
 import enums.EstadoDaMao;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
-import jogo.Jogador;
 import jogo.Mao;
-import jogo.Rodada;
 
 /**
  * @class MaoInfo
@@ -14,17 +13,20 @@ import jogo.Rodada;
  */
 public class MaoInfo implements Serializable {
 
-    private final List<Rodada> rodadas;
+    private final List<RodadaInfo> rodadas;
     private final EstadoDaMao estadoDaMao;
-    private final Jogador jogadorGanhador;
+    private final JogadorInfo jogadorGanhador;
 
     public MaoInfo(Mao mao) {
-        this.rodadas = mao.getRodadas();
+        rodadas = new ArrayList<>();
+        mao.getRodadas().stream().forEach(rodada -> {
+            rodadas.add(rodada.getInfoRodada());
+        });
         this.estadoDaMao = mao.getEstadoDaMao();
-        this.jogadorGanhador = mao.getJogadorGanhador();
+        this.jogadorGanhador = mao.getJogadorGanhador() != null ? mao.getJogadorGanhador().getInfoJogador() : null;
     }
 
-    public List<Rodada> getRodadas() {
+    public List<RodadaInfo> getRodadas() {
         return rodadas;
     }
 
@@ -32,8 +34,15 @@ public class MaoInfo implements Serializable {
         return estadoDaMao;
     }
 
-    public Jogador getJogadorGanhador() {
+    public JogadorInfo getJogadorGanhador() {
         return jogadorGanhador;
     }
+
+    @Override
+    public String toString() {
+        return "MaoInfo{" + "rodadas=" + rodadas + ", estadoDaMao=" + estadoDaMao + ", jogadorGanhador=" + jogadorGanhador + '}';
+    }
+    
+    
 
 }

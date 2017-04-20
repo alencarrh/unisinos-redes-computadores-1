@@ -100,6 +100,7 @@ public class ClienteMain {
                 break;
             case DADOS_MAO:
                 mostrarDadosDaMao(msg);
+                break;
             case INFO_JOGADA_OPONENTE:
                 mostrarJogadaAnterior(msg);
                 break;
@@ -217,7 +218,20 @@ public class ClienteMain {
     }
 
     private static void mostrarDadosDaMao(Mensagem<MaoInfo> msg) {
-        System.out.println("POR FAZER.......");
+        MaoInfo maoInfo = msg.getValor();
+        if (!maoInfo.getRodadas().isEmpty()) {
+            System.out.println("Rodadas anteriores: ");
+            for (int i = 0; i < maoInfo.getRodadas().size(); i++) {
+                RodadaInfo rodada = maoInfo.getRodadas().get(i);
+                System.out.println("-Rodada " + (i + 1));
+                for (int j = 0; j < rodada.getJogadas().size(); j++) {
+                    Jogada jogada = rodada.getJogadas().get(j);
+                    System.out.println("-->Jodada " + (i + 1) + ": " + jogada.getJogadorInfo().getNomeJogador() + " " + jogada.getAcaoRealizada());
+                }
+            }
+        }
+        System.out.println("Rodada número: " + (maoInfo.getRodadas().size() + 1));
+
     }
 
 }
