@@ -104,6 +104,9 @@ public class ClienteMain {
             case INFO_JOGADA_OPONENTE:
                 mostrarJogadaAnterior(msg);
                 break;
+            case PLACAR:
+                mostrarPlacar(msg);
+                break;
             case INFORMAR_PERDA_CONEXAO:
                 informarPerdaConexao(msg);
                 requisitarSalasDisponiveis();
@@ -221,6 +224,9 @@ public class ClienteMain {
 
     private static void mostrarDadosDaMao(Mensagem<MaoInfo> msg) {
         MaoInfo maoInfo = msg.getValor();
+        if (maoInfo.getJogadorGanhador() != null) {
+            System.out.println("****** FIM DA MÃO ******");
+        }
         if (!maoInfo.getRodadas().isEmpty()) {
             System.out.println("Rodadas anteriores: ");
             for (int i = 0; i < maoInfo.getRodadas().size(); i++) {
@@ -230,15 +236,27 @@ public class ClienteMain {
                     Jogada jogada = rodada.getJogadas().get(j);
                     System.out.println("-->Jodada " + (j + 1) + ": " + jogada.getJogadorInfo().getNomeJogador() + " " + jogada.getAcaoRealizada());
                 }
-                System.out.println("Ganhador: " + rodada.getJogadorGanhador().getNomeJogador());
+                System.out.println(">>Ganhador: " + (rodada.isEmpatou() ? "Empate" : rodada.getJogadorGanhador().getNomeJogador()));
             }
-            if (maoInfo.getJogadorGanhador() != null) {
-                System.out.println("\nGanhador da Mao: " + maoInfo.getJogadorGanhador().getNomeJogador());
-            }
+
         }
 
-        System.out.println("\n\nIniciando rodada número: " + (maoInfo.getRodadas().size() + 1));
+        if (maoInfo.getJogadorGanhador() != null) {
+            System.out.println("\nGanhador da Mão: " + maoInfo.getJogadorGanhador().getNomeJogador());
+            System.out.println("\n\n\n\n\n\n****** INICIANDO PRÓXIMA MÃO ******");
+        } else {
+            System.out.println("\n\n****** INICIANDO PRÓXIMA RODADA (" + (maoInfo.getRodadas().size() + 1) + ")******");
+        }
 
+    }
+
+    private static void mostrarPlacar(Mensagem<PartidaInfo> msg) {
+        System.out.println("\nPLACAR:");
+        JogadorInfo jogador1 = msg.getValor().getJogador1();
+        JogadorInfo jogador2 = msg.getValor().getJogador2();
+        System.out.print("   " + jogador1.getNomeJogador() + " " + jogador1.getTentos());
+        System.out.print(" vs " + jogador2.getTentos() + " " + jogador2.getNomeJogador());
+        System.out.println("\n");
     }
 
 }

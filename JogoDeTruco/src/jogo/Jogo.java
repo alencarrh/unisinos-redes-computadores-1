@@ -373,8 +373,7 @@ public class Jogo {
                 Jogo.definirGanhadorMao(mao, jogador2);
                 jogador2.getConexao().enviar(new Mensagem<>(AcaoDaMensagem.INFO_JOGADA_OPONENTE, jogada.getValor()));
                 return false;
-            case QUERO:
-                jogador2.getConexao().enviar(new Mensagem<>(AcaoDaMensagem.INFO_JOGADA_OPONENTE, jogada.getValor()));
+            case QUERO://A principio, nunca chega neste case
                 return false;
             case ENVIDO:
 //                return chamarEnvido(jogador1, jogador2);
@@ -399,6 +398,7 @@ public class Jogo {
             case TRUCO:
                 aceitou = Jogo.chamarTruco(mao, rodadaAtual, jogador1, jogador2, jogada);
                 if (aceitou) {
+                    jogador1.getConexao().enviar(new Mensagem<>(AcaoDaMensagem.INFO_JOGADA_OPONENTE, new Jogada(AcaoDaJogada.QUERO, null, jogador2.getInfoJogador())));
                     return true;
                 }
                 //Colocar jogador1 como ganhador da mao e da rodada
@@ -411,6 +411,7 @@ public class Jogo {
             case RETRUCO:
                 aceitou = Jogo.chamarReTruco(mao, rodadaAtual, jogador1, jogador2, jogada);
                 if (aceitou) {
+                    jogador1.getConexao().enviar(new Mensagem<>(AcaoDaMensagem.INFO_JOGADA_OPONENTE, new Jogada(AcaoDaJogada.QUERO, null, jogador2.getInfoJogador())));
                     return true;
                 }
                 //Colocar jogador1 como ganhador da mao e da rodada
@@ -423,6 +424,7 @@ public class Jogo {
             case VALE_QUATRO:
                 aceitou = Jogo.chamarValeQuatro(mao, rodadaAtual, jogador1, jogador2, jogada);
                 if (aceitou) {
+//                    jogador1.getConexao().enviar(new Mensagem<>(AcaoDaMensagem.INFO_JOGADA_OPONENTE, new Jogada(AcaoDaJogada.QUERO, null, jogador2.getInfoJogador())));
                     return true;
                 }
                 //Colocar jogador1 como ganhador da mao e da rodada
@@ -484,14 +486,16 @@ public class Jogo {
         enviarDadosJogada(jogador2, jogador1, mao, jogada);
         Mensagem<Jogada> msgJogadaJogador2 = jogador2.getConexao().receber();
         Util.printarRecebimentoInfo(jogador2, msgJogadaJogador2);
-        rodadaAtual.getJogadas().add(msgJogadaJogador2.getValor());
         switch (msgJogadaJogador2.getValor().getAcaoDaJogada()) {
             case QUERO:
                 Jogo.aceitouRetruco(mao);
+                rodadaAtual.getJogadas().add(msgJogadaJogador2.getValor());
                 return true;
             case NAO_QUERO:
+                rodadaAtual.getJogadas().add(msgJogadaJogador2.getValor());
                 return false;
             case IR_PARA_BARALHO:
+                rodadaAtual.getJogadas().add(msgJogadaJogador2.getValor());
                 return false;
             case VALE_QUATRO:
                 Jogo.aceitouRetruco(mao);
