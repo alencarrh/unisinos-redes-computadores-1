@@ -2,6 +2,39 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
+        <group>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/comunicacao/MensagemEntrarEmPartida.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/comunicacao/ControladorConexao.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/jogo/Jogador.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/comunicacao/MensagemOpcoes.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/jogo/Mao.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/comunicacao/MensagemJogada.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/comunicacao/MensagemTexto.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/main/ServidorMain.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/comunicacao/Mensagem.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/jogo/Partida.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/jogo/Jogo.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/enums/Carta.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/servidor/Servidor.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/servidor/JogadorListener.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/main/ClienteMain.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/enums/AcaoDaMensagem.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/comunicacao/MensagemJogador.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/util/Util.java</file>
+            <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/jogo/Sala1.java</file>
+        </group>
+        <group name="github">
+            <file>file:/C:/alencar/RedesComputadoresI/JogoDeTruco/src/main/ServidorMain.java</file>
+            <file>file:/C:/alencar/RedesComputadoresI/JogoDeTruco/src/jogo/Partida.java</file>
+            <file>file:/C:/alencar/RedesComputadoresI/JogoDeTruco/src/jogo/Rodada.java</file>
+            <file>file:/C:/alencar/RedesComputadoresI/JogoDeTruco/src/jogo/Jogada.java</file>
+            <file>file:/C:/alencar/RedesComputadoresI/JogoDeTruco/src/comunicacao/ControladorConexao.java</file>
+            <file>file:/C:/alencar/RedesComputadoresI/JogoDeTruco/src/enums/AcaoDaMensagem.java</file>
+            <file>file:/C:/alencar/RedesComputadoresI/JogoDeTruco/src/jogo/Jogador.java</file>
+            <file>file:/C:/alencar/RedesComputadoresI/JogoDeTruco/src/main/ClienteMain.java</file>
+            <file>file:/C:/alencar/RedesComputadoresI/JogoDeTruco/src/servidor/JogadorListener.java</file>
+            <file>file:/C:/alencar/RedesComputadoresI/JogoDeTruco/src/servidor/Servidor.java</file>
+            <file>file:/C:/alencar/RedesComputadoresI/JogoDeTruco/src/comunicacao/Mensagem.java</file>
+        </group>
     </open-files>
 </project-private>
