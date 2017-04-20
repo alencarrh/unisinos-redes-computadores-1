@@ -19,6 +19,8 @@ public enum AcaoDaMensagem implements Serializable {
     JOGAR,
     AGUARDAR_OUTRO_JOGADOR,
     DADOS_RODADA,
+    DADOS_MAO,
     INFORMAR_PERDA_CONEXAO,
+    INFO_JOGADA_OPONENTE,
 
 }

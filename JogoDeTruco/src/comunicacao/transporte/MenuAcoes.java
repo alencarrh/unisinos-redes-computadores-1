@@ -12,16 +12,10 @@ import jogo.Jogada;
  */
 public class MenuAcoes implements Serializable {
 
-    private final Jogada jogadaAnterior;
     private final List<Jogada> jogadas;
 
-    public MenuAcoes(Jogada jogadaAnterior) {
+    public MenuAcoes() {
         jogadas = new ArrayList<>();
-        this.jogadaAnterior = jogadaAnterior;
-    }
-
-    public Jogada getJogadaAnterior() {
-        return jogadaAnterior;
     }
 
     public List<Jogada> getJogadas() {

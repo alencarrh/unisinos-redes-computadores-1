@@ -3,7 +3,6 @@ package comunicacao.transporte;
 import java.io.Serializable;
 import java.util.List;
 import jogo.Jogada;
-import jogo.Jogador;
 import jogo.Rodada;
 
 /**
@@ -18,7 +17,7 @@ public class RodadaInfo implements Serializable {
 
     public RodadaInfo(Rodada rodada) {
         this.jogadas = rodada.getJogadas();
-        this.jogadorGanhador = rodada.getJogadorGanhador().getInfoJogador();
+        this.jogadorGanhador = rodada.getJogadorGanhador() != null ? rodada.getJogadorGanhador().getInfoJogador() : null;
     }
 
     public RodadaInfo() {

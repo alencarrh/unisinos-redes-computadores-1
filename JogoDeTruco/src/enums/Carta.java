@@ -1,6 +1,10 @@
 package enums;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 
 /**
  * @class Carta
@@ -61,6 +65,18 @@ public enum Carta implements Serializable {
 
     public int getPontosSomadosNoEnvido() {
         return pontosSomadosNoEnvidoOuFlor;
+    }
+
+    public static Carta gerarCartaAleatoria() {
+        return gerarCartaAleatoria(new ArrayList<>(Arrays.asList(Carta.values())));
+    }
+
+    public static Carta gerarCartaAleatoria(List<Carta> cartas) {
+        return cartas.get(geraNumeroParaCarta(cartas));
+    }
+
+    private static Integer geraNumeroParaCarta(List<Carta> cartas) {
+        return new Random().nextInt(cartas.size());
     }
 
     @Override

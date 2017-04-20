@@ -17,23 +17,15 @@ public class Rodada implements Serializable {
 
     private Jogador jogadorGanhador;
     private final List<Jogada> jogadas;
-    private int tentosDaRodada;
+    private boolean empatou;
 
     public Rodada() {
         jogadas = new ArrayList<>();
-        tentosDaRodada = 0;
+        this.empatou = false;
     }
 
     public List<Jogada> getJogadas() {
         return jogadas;
-    }
-
-    public int getTentosDaRodada() {
-        return tentosDaRodada;
-    }
-
-    public void aumentarTentosDaRodada(int tentosAAumentar) {
-        this.tentosDaRodada += tentosAAumentar;
     }
 
     public Jogador getJogadorGanhador() {
@@ -46,6 +38,14 @@ public class Rodada implements Serializable {
 
     public RodadaInfo getInfoRodada() {
         return new RodadaInfo(this);
+    }
+
+    public boolean isEmpatou() {
+        return empatou;
+    }
+
+    public void setEmpatou(boolean empatou) {
+        this.empatou = empatou;
     }
 
     /**
