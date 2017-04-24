@@ -2,6 +2,7 @@ package main;
 
 import comunicacao.ControladorConexao;
 import comunicacao.Mensagem;
+import comunicacao.transporte.EnvidoInfo;
 import comunicacao.transporte.Info;
 import comunicacao.transporte.JogadorInfo;
 import comunicacao.transporte.MaoInfo;
@@ -103,6 +104,9 @@ public class ClienteMain {
                 break;
             case INFO_JOGADA_OPONENTE:
                 mostrarJogadaAnterior(msg);
+                break;
+            case INFO_VENCEDOR_PONTOS:
+                mostrarDadosEnvido(msg);
                 break;
             case PLACAR:
                 mostrarPlacar(msg);
@@ -269,6 +273,20 @@ public class ClienteMain {
         mostrarPlacar(msg);
         System.out.println(">>>>GANHADOR: " + msg.getValor().getJogadorVencedor().getNomeJogador());
 
+    }
+
+    private static void mostrarDadosEnvido(Mensagem<EnvidoInfo> msg) {
+        System.out.println("\n****** RESUTLADO DO " + msg.getValor().getAcao().toString() + " ******");
+        boolean esteVenceu = jogador.getIdJogador().equals(msg.getValor().getJogadorVencedor().getIdJogador());
+        if (esteVenceu) {
+            System.out.println("### Você venceu! ###");
+            System.out.println("Seus pontos: " + msg.getValor().getPontosJogadorVencedor());
+            System.out.println("Pontos do oponente: " + msg.getValor().getPontosOutroVencedor());
+        } else {
+            System.out.println("### Você perdeu. ###");
+            System.out.println("Seus pontos: " + msg.getValor().getPontosOutroVencedor());
+            System.out.println("Pontos do oponente: " + msg.getValor().getPontosJogadorVencedor());
+        }
     }
 
 }

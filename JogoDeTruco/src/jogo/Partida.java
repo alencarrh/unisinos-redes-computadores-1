@@ -167,18 +167,18 @@ public class Partida extends Thread {
         Jogo.enviarCartas(jogador1);
         Jogo.enviarCartas(jogador2);
         Mensagem<Jogada> msgJogadaJogador1, msgJogadaJogador2;
-
+        Jogador jogadorMao = jogador1;
         //Enquanto a mão não tiver um ganhador.
         while (mao.getJogadorGanhador() == null) {
             Rodada rodadaAtual = new Rodada();
             mao.getRodadas().add(rodadaAtual);
             //Enquanto a rodada não tiver um ganhador
             while (rodadaAtual.getJogadorGanhador() == null) {
-                msgJogadaJogador1 = realizarJogada(mao, rodadaAtual, jogador1, jogador2, null);
+                msgJogadaJogador1 = realizarJogada(mao, rodadaAtual, jogador1, jogador2, null, jogadorMao);
 
                 //Verificação para caso o jogador1 IR_PARA_BARALHO
                 if (rodadaAtual.getJogadorGanhador() == null) {
-                    msgJogadaJogador2 = realizarJogada(mao, rodadaAtual, jogador2, jogador1, msgJogadaJogador1);
+                    msgJogadaJogador2 = realizarJogada(mao, rodadaAtual, jogador2, jogador1, msgJogadaJogador1, jogadorMao);
                 } else {
                     //Inverter jogador1 e jogador2 pois jogador2 venceu está rodada
                     Jogador temp = jogador1;
@@ -194,7 +194,7 @@ public class Partida extends Thread {
                 }
 
                 //Neste momento, é garantido que ambas jogadas foram JOGADAS_SIMPLES
-                Jogo.calcularGanhadorRodada(mao, rodadaAtual, jogador1, jogador2, msgJogadaJogador1, msgJogadaJogador2);
+                Jogo.calcularGanhadorRodada(mao, rodadaAtual, jogador1, jogador2, msgJogadaJogador1, msgJogadaJogador2, jogadorMao);
 
                 if (existeGanhadorPartida()) {
                     //Retorna para o while principal
@@ -222,14 +222,14 @@ public class Partida extends Thread {
         }
     }
 
-    public Mensagem<Jogada> realizarJogada(Mao mao, Rodada rodadaAtual, Jogador jogador1, Jogador jogador2, Mensagem<Jogada> jogadaAnterior) throws IOException, ClassNotFoundException {
+    public Mensagem<Jogada> realizarJogada(Mao mao, Rodada rodadaAtual, Jogador jogador1, Jogador jogador2, Mensagem<Jogada> jogadaAnterior, Jogador jogadorMao) throws IOException, ClassNotFoundException {
         Mensagem<Jogada> jogadaDesteJogador;
         boolean vezDesteJogador;
         do {
             Jogo.enviarDadosJogada(jogador1, jogador2, mao, jogadaAnterior);
             jogadaDesteJogador = jogador1.getConexao().receber();
             Util.printarRecebimentoInfo(jogador1, jogadaDesteJogador);
-            vezDesteJogador = Jogo.tratarJogada(mao, rodadaAtual, jogadaDesteJogador, jogador1, jogador2);
+            vezDesteJogador = Jogo.tratarJogada(mao, rodadaAtual, jogadaDesteJogador, jogador1, jogador2, jogadorMao);
         } while (vezDesteJogador);
         return jogadaDesteJogador;
     }
@@ -262,7 +262,6 @@ public class Partida extends Thread {
                 if (mao.getRodadas().get(0).isEmpatou()) {
                     //Se empatou a 1ª rodada, o jogador que ganhar a 2ª vence.
                     Jogo.definirGanhadorMao(mao, mao.getRodadas().get(1).getJogadorGanhador());
-//                    mao.setJogadorGanhador(mao.getRodadas().get(1).getJogadorGanhador());
                 }
                 //Verifica se um dos jogadores ganhou as duas primeiras rodadas
                 calcularJogadorGanhador(mao);
@@ -270,7 +269,6 @@ public class Partida extends Thread {
             case 3:
                 if (mao.getRodadas().get(2).isEmpatou()) {
                     //Se empatou a 3ª rodada, o jogador que ganhou a 2ª vence.
-//                    mao.setJogadorGanhador(mao.getRodadas().get(1).getJogadorGanhador());
                     Jogo.definirGanhadorMao(mao, mao.getRodadas().get(1).getJogadorGanhador());
                 }
                 calcularJogadorGanhador(mao);
@@ -358,10 +356,19 @@ public class Partida extends Thread {
         }
     }
 
+    /**
+     * Envia mensagem informando parda de conexão com o outro jogador.
+     *
+     * @param jogador
+     * @throws IOException
+     */
     private void informarPerdaDeConexao(Jogador jogador) throws IOException {
         jogador.getConexao().enviar(new Mensagem<>(AcaoDaMensagem.INFORMAR_PERDA_CONEXAO, new Info("O outro jogador perdeu a conexão com a partida...")));
     }
 
+    /**
+     * Envia informações de placar
+     */
     private void enviarPlacar() {
         jogadores.forEach(jogador -> {
             try {
