@@ -282,10 +282,12 @@ public class ClienteMain {
             System.out.println("### Você venceu! ###");
             System.out.println("Seus pontos: " + msg.getValor().getPontosJogadorVencedor());
             System.out.println("Pontos do oponente: " + msg.getValor().getPontosOutroVencedor());
+            System.out.println("Tentos: " + msg.getValor().getTentosGanho());
         } else {
             System.out.println("### Você perdeu. ###");
             System.out.println("Seus pontos: " + msg.getValor().getPontosOutroVencedor());
             System.out.println("Pontos do oponente: " + msg.getValor().getPontosJogadorVencedor());
+            System.out.println("Tentos: " + msg.getValor().getTentosGanho());
         }
     }
 

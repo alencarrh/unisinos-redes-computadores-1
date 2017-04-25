@@ -15,16 +15,18 @@ public class EnvidoInfo implements Serializable {
     private JogadorInfo outroJogador;
     private int pontosOutroVencedor;
     private AcaoDaJogada acao;
+    private int tentosGanho;
 
     public EnvidoInfo() {
     }
 
-    public EnvidoInfo(JogadorInfo jogadorVencedor, int pontosJogadorVencedor, JogadorInfo outroJogador, int pontosOutroVencedor, AcaoDaJogada acao) {
+    public EnvidoInfo(JogadorInfo jogadorVencedor, int pontosJogadorVencedor, JogadorInfo outroJogador, int pontosOutroVencedor, AcaoDaJogada acao, int tentosGanho) {
         this.jogadorVencedor = jogadorVencedor;
         this.pontosJogadorVencedor = pontosJogadorVencedor;
         this.outroJogador = outroJogador;
         this.pontosOutroVencedor = pontosOutroVencedor;
         this.acao = acao;
+        this.tentosGanho = tentosGanho;
     }
 
     public JogadorInfo getJogadorVencedor() {
@@ -65,6 +67,14 @@ public class EnvidoInfo implements Serializable {
 
     public void setAcao(AcaoDaJogada acao) {
         this.acao = acao;
+    }
+
+    public int getTentosGanho() {
+        return tentosGanho;
+    }
+
+    public void setTentosGanho(int tentosGanho) {
+        this.tentosGanho = tentosGanho;
     }
 
 }

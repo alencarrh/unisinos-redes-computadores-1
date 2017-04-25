@@ -26,7 +26,6 @@ import util.Util;
  */
 public class Partida extends Thread {
 
-    private static final int PONTUACAO_MAXIMA = 24;
     private final Long idPartida;
     private final String nomePartida;
     private int indiceJogadorVencedor;
@@ -164,12 +163,12 @@ public class Partida extends Thread {
      */
     private void iniciarMao(Mao mao, Jogador jogador1, Jogador jogador2) throws IOException, ClassNotFoundException {
         Jogo.darCartas(jogador1, jogador2);
-        Jogo.enviarCartas(jogador1);
-        Jogo.enviarCartas(jogador2);
         Mensagem<Jogada> msgJogadaJogador1, msgJogadaJogador2;
         Jogador jogadorMao = jogador1;
         //Enquanto a mão não tiver um ganhador.
         while (mao.getJogadorGanhador() == null) {
+            Jogo.enviarCartas(jogador1);
+            Jogo.enviarCartas(jogador2);
             Rodada rodadaAtual = new Rodada();
             mao.getRodadas().add(rodadaAtual);
             //Enquanto a rodada não tiver um ganhador
@@ -297,7 +296,7 @@ public class Partida extends Thread {
      * da partida para todos os jogadores.
      */
     private void informarPlacarFinal() {
-        Jogador jogadorGanhador = jogadores.stream().filter((jogador) -> (jogador.getTentos() >= PONTUACAO_MAXIMA)).collect(Collectors.toList()).get(0);
+        Jogador jogadorGanhador = jogadores.stream().filter((jogador) -> (jogador.getTentos() >= Jogo.PONTUACAO_MAXIMA)).collect(Collectors.toList()).get(0);
         this.indiceJogadorVencedor = this.jogadores.indexOf(jogadorGanhador);
         jogadores.forEach(jogador -> {
             try {
@@ -317,7 +316,7 @@ public class Partida extends Thread {
      * @return
      */
     private boolean existeGanhadorPartida() {
-        return jogadores.stream().anyMatch((jogador) -> (jogador.getTentos() >= PONTUACAO_MAXIMA));
+        return jogadores.stream().anyMatch((jogador) -> (jogador.getTentos() >= Jogo.PONTUACAO_MAXIMA));
     }
 
     /**
