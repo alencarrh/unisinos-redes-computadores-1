@@ -212,11 +212,12 @@ public class Partida extends Thread {
             if (mao.getJogadorGanhador() == null) {
                 calcularGanhadorDaMao(mao);
             }
-            enviarDadosDaMao(mao);
-            enviarPlacar();
             if (existeGanhadorPartida()) {
                 //Retorna para o while principal
                 return;
+            } else {
+                enviarDadosDaMao(mao);
+                enviarPlacar();
             }
         }
     }
@@ -260,7 +261,14 @@ public class Partida extends Thread {
             case 2:
                 if (mao.getRodadas().get(0).isEmpatou()) {
                     //Se empatou a 1ª rodada, o jogador que ganhar a 2ª vence.
+                    if (mao.getRodadas().get(1).isEmpatou()) {
+                        //TODO: se empatou a primeira e a segunda, o ganhador da terceira rodada vence.
+                        //  Se empatar as 3 rodadas, o jogador mão vence.
+                    }
                     Jogo.definirGanhadorMao(mao, mao.getRodadas().get(1).getJogadorGanhador());
+                } else if (mao.getRodadas().get(1).isEmpatou()) {
+                    //Se empatou a 2ª rodada, o jogador que ganhou 1ª vence
+                    Jogo.definirGanhadorMao(mao, mao.getRodadas().get(0).getJogadorGanhador());
                 }
                 //Verifica se um dos jogadores ganhou as duas primeiras rodadas
                 calcularJogadorGanhador(mao);
@@ -268,6 +276,7 @@ public class Partida extends Thread {
             case 3:
                 if (mao.getRodadas().get(2).isEmpatou()) {
                     //Se empatou a 3ª rodada, o jogador que ganhou a 2ª vence.
+                    //TODO: verificar se outras rodadas também não empataram
                     Jogo.definirGanhadorMao(mao, mao.getRodadas().get(1).getJogadorGanhador());
                 }
                 calcularJogadorGanhador(mao);
