@@ -2,6 +2,7 @@ package main;
 
 import comunicacao.ControladorConexao;
 import comunicacao.Mensagem;
+import comunicacao.transporte.PontosInfo;
 import comunicacao.transporte.Info;
 import comunicacao.transporte.JogadorInfo;
 import comunicacao.transporte.MaoInfo;
@@ -17,6 +18,7 @@ import java.io.InvalidObjectException;
 import java.util.List;
 import jogo.Jogada;
 import jogo.Jogador;
+import util.Teclado;
 import util.Util;
 
 /**
@@ -45,13 +47,28 @@ public class ClienteMain {
 
     private static void estabelecerConexaoComServidor(String[] args) throws IOException {
         //Verifica se o IP do servidor foi passado por parâmetro
-        System.out.println("Estabelecendo conexão com o servidor...");
-        if (args.length == 0) {
-            conexao = new ControladorConexao("127.0.0.1", 6789);
-        } else {
-            conexao = new ControladorConexao(args[0], 6789);
+        System.out.print("\nEstabelecendo conexão com o servidor");
+        switch (args.length) {
+            case 0:
+                System.out.print("[127.0.0.1:6789]...");
+                conexao = new ControladorConexao("127.0.0.1", 6789);
+                break;
+            case 1:
+                System.out.print("[" + args[0] + ":6789]...");
+                conexao = new ControladorConexao(args[0], 6789);
+                break;
+            default:
+                int porta = 6789;
+                try {
+                    porta = Integer.valueOf(args[1]);
+                } catch (NumberFormatException ex) {
+                    System.out.println("Parâmetro [1] deve ser inteiro. Utilizando porta padrão [6789]");
+                }
+                System.out.print("[" + args[0] + ": " + porta + "]...");
+                conexao = new ControladorConexao(args[0], porta);
+                break;
         }
-        System.out.println("Conexão estabelecida com sucesso!");
+        System.out.println("\nConexão estabelecida com sucesso!");
     }
 
     private static void iniciarInformacoesSobreJogador() throws Exception {
@@ -104,6 +121,9 @@ public class ClienteMain {
             case INFO_JOGADA_OPONENTE:
                 mostrarJogadaAnterior(msg);
                 break;
+            case INFO_VENCEDOR_PONTOS:
+                mostrarDadosPontos(msg);
+                break;
             case PLACAR:
                 mostrarPlacar(msg);
                 break;
@@ -129,9 +149,8 @@ public class ClienteMain {
         partidas.getPartidas().stream().forEach((partida) -> {
             System.out.println(partida.getIdPartida() + " - " + partida.getNomePartida());
         });
-        System.out.print("Opção: ");
-        String op = KEYBOARD_INPUT.readLine();
-        Long id = new Long(op);
+        Integer op = Teclado.lerInteiro("Opção: ");
+        Long id = new Long(op == null ? 0 : op);
         realizarAcaoListagemSala(id, partidas);
     }
 
@@ -151,7 +170,7 @@ public class ClienteMain {
             default:
                 int pos = partidas.getPartidas().indexOf(new PartidaInfo(id, null, null));
                 if (pos == -1) {
-                    System.out.println("Opção inválida!");
+                    System.out.println("Opção inválida!\n");
                     requisitarSalasDisponiveis();
                 } else {
                     conexao.enviar(new Mensagem<>(AcaoDaMensagem.ESCOLHER_PARTIDA, partidas.getPartidas().get(pos)));
@@ -181,10 +200,8 @@ public class ClienteMain {
         for (int i = 0; i < jogadas.size(); i++) {
             System.out.println((i + 1) + "-> " + jogadas.get(i).printarParaMenu());
         }
-        System.out.print("Jogar: ");
-        String opJogada = KEYBOARD_INPUT.readLine();
-        //TODO: validar jogada
-        Integer op = new Integer(opJogada) - 1;
+        Integer op = Teclado.lerInteiro("Jogar: ", 1, jogadas.size());
+        op--;
         conexao.enviar(new Mensagem<>(AcaoDaMensagem.JOGAR, jogadas.get(op)));
         Util.limparCMD();
         System.out.println("\nVocê " + jogadas.get(op).getAcaoRealizada() + "\n");
@@ -248,6 +265,7 @@ public class ClienteMain {
 
         if (maoInfo.getJogadorGanhador() != null) {
             System.out.println("\nGanhador da Mão: " + maoInfo.getJogadorGanhador().getNomeJogador());
+            System.out.println("Tentos: " + maoInfo.getEstadoDaMao().getValorDoEstado());
             System.out.println("\n\n\n\n\n\n****** INICIANDO PRÓXIMA MÃO ******");
         } else {
             System.out.println("\n\n****** INICIANDO PRÓXIMA RODADA (" + (maoInfo.getRodadas().size() + 1) + ")******");
@@ -269,6 +287,22 @@ public class ClienteMain {
         mostrarPlacar(msg);
         System.out.println(">>>>GANHADOR: " + msg.getValor().getJogadorVencedor().getNomeJogador());
 
+    }
+
+    private static void mostrarDadosPontos(Mensagem<PontosInfo> msg) {
+        System.out.println("\n****** RESUTLADO DO " + msg.getValor().getAcao().toString() + " ******");
+        boolean esteVenceu = jogador.getIdJogador().equals(msg.getValor().getJogadorVencedor().getIdJogador());
+        if (esteVenceu) {
+            System.out.println("### Você venceu! ###");
+            System.out.println("Seus pontos: " + msg.getValor().getPontosJogadorVencedor());
+            System.out.println("Pontos do oponente: " + msg.getValor().getPontosOutroVencedor());
+            System.out.println("Tentos: " + msg.getValor().getTentosGanho());
+        } else {
+            System.out.println("### Você perdeu. ###");
+            System.out.println("Seus pontos: " + msg.getValor().getPontosOutroVencedor());
+            System.out.println("Pontos do oponente: " + msg.getValor().getPontosJogadorVencedor());
+            System.out.println("Tentos: " + msg.getValor().getTentosGanho());
+        }
     }
 
 }

@@ -2,6 +2,7 @@ package comunicacao.transporte;
 
 import enums.Carta;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import jogo.Jogador;
@@ -16,17 +17,22 @@ public class JogadorInfo implements Serializable {
     private final Long idJogador;
     private String nomeJogador;
     private int tentos;
-    private List<Carta> cartas;
+    private final List<Carta> cartas;
 
     public JogadorInfo(Long idJogador) {
         this.idJogador = idJogador;
+        this.cartas = null;
     }
 
     public JogadorInfo(Jogador jogador) {
         this.idJogador = jogador.getIdJogador();
         this.nomeJogador = jogador.getNomeJogador();
         this.tentos = jogador.getTentos();
-        this.cartas = jogador.getCartas();
+        if (jogador.getCartas() != null) {
+            this.cartas = new ArrayList<>(jogador.getCartas());
+        } else {
+            this.cartas = null;
+        }
     }
 
     public Long getIdJogador() {
@@ -51,10 +57,6 @@ public class JogadorInfo implements Serializable {
 
     public List<Carta> getCartas() {
         return cartas;
-    }
-
-    public void setCartas(List<Carta> cartas) {
-        this.cartas = cartas;
     }
 
     @Override
