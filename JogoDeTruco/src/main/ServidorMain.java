@@ -18,7 +18,17 @@ public class ServidorMain {
     private static final BufferedReader KEYBOARD_INPUT = new BufferedReader(new InputStreamReader(System.in));
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        server = new Servidor(6789);
+        if (args.length == 0) {
+            server = new Servidor(6789);
+        } else {
+            try {
+                int porta = Integer.valueOf(args[0]);
+                server = new Servidor(porta);
+            } catch (NumberFormatException ex) {
+                System.out.println("Parâmetro [0] deve ser inteiro. Utilizando porta padrão [6789]");
+                server = new Servidor(6789);
+            }
+        }
 
         Thread startServer = new Thread(() -> {
             try {

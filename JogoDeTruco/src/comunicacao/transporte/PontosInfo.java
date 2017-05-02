@@ -8,7 +8,7 @@ import java.io.Serializable;
  * @created 24/04/2017
  * @author alencar.hentges (CWI Software)
  */
-public class EnvidoInfo implements Serializable {
+public class PontosInfo implements Serializable {
 
     private JogadorInfo jogadorVencedor;
     private int pontosJogadorVencedor;
@@ -17,10 +17,10 @@ public class EnvidoInfo implements Serializable {
     private AcaoDaJogada acao;
     private int tentosGanho;
 
-    public EnvidoInfo() {
+    public PontosInfo() {
     }
 
-    public EnvidoInfo(JogadorInfo jogadorVencedor, int pontosJogadorVencedor, JogadorInfo outroJogador, int pontosOutroVencedor, AcaoDaJogada acao, int tentosGanho) {
+    public PontosInfo(JogadorInfo jogadorVencedor, int pontosJogadorVencedor, JogadorInfo outroJogador, int pontosOutroVencedor, AcaoDaJogada acao, int tentosGanho) {
         this.jogadorVencedor = jogadorVencedor;
         this.pontosJogadorVencedor = pontosJogadorVencedor;
         this.outroJogador = outroJogador;

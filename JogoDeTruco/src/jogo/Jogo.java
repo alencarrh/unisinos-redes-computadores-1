@@ -1,7 +1,7 @@
 package jogo;
 
 import comunicacao.Mensagem;
-import comunicacao.transporte.EnvidoInfo;
+import comunicacao.transporte.PontosInfo;
 import comunicacao.transporte.JogadorInfo;
 import comunicacao.transporte.MenuAcoes;
 import enums.AcaoDaJogada;
@@ -305,13 +305,20 @@ public class Jogo {
                 return;
             case FLOR:
                 if (Jogo.podeChamarContraFlor(mao, jogador)) {
-                    jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null, jogador.getInfoJogador()));
-                    jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null, jogador.getInfoJogador()));
                     jogadasPossiveis.add(new Jogada(AcaoDaJogada.CONTRA_FLOR, null, jogador.getInfoJogador()));
                     jogadasPossiveis.add(new Jogada(AcaoDaJogada.CONTRA_FLOR_E_RESTO, null, jogador.getInfoJogador()));
                 } else {
                     jogadasPossiveis.add(new Jogada(AcaoDaJogada.BOA, null, jogador.getInfoJogador()));
                 }
+                return;
+            case CONTRA_FLOR:
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null, jogador.getInfoJogador()));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null, jogador.getInfoJogador()));
+                return;
+            case CONTRA_FLOR_E_RESTO:
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.QUERO, null, jogador.getInfoJogador()));
+                jogadasPossiveis.add(new Jogada(AcaoDaJogada.NAO_QUERO, null, jogador.getInfoJogador()));
+                return;
         }
     }
 
@@ -437,15 +444,16 @@ public class Jogo {
                 Jogo.chamarFaltaEnvido(mao, rodadaAtual, jogador1, jogador2, jogada, jogadorMao, 0);
                 return !existeGanhador(mao, rodadaAtual, jogador1, jogador2);
             case FLOR:
-//                return chamarFlor(jogador1, jogador2);
-                return true;
+                Jogo.chamarFlor(mao, rodadaAtual, jogador1, jogador2, jogada, jogadorMao, 0);
+                return !existeGanhador(mao, rodadaAtual, jogador1, jogador2);
             case CONTRA_FLOR:
-//                return chamarContraFlor(jogador1, jogador2);
+                //não deveria cair aqui.
                 return true;
             case CONTRA_FLOR_E_RESTO:
-//                return chamarContraFlorEResto(jogador1, jogador2);
+                //não deveria cair aqui.
                 return true;
             case BOA:
+                //não deveria cair aqui.
                 return false;
             case TRUCO:
                 aceitou = Jogo.chamarTruco(mao, rodadaAtual, jogador1, jogador2, jogada, jogadorMao);
@@ -671,23 +679,71 @@ public class Jogo {
         }
     }
 
-    private static void calcularGanhadorDosPontos(Jogador jogador1, Jogador jogador2, int pontos, Jogador jogadorMao, AcaoDaJogada acao) throws IOException {
-        int pontuacaoJogador1 = calcularPontosJogador(jogador1);
-        int pontuacaoJogador2 = calcularPontosJogador(jogador2);
-        if (pontuacaoJogador1 > pontuacaoJogador2) {
-            jogador1.addTentos(pontos);
-            Jogo.informarGanhadorPontos(jogador1, jogador2, acao, pontos);
-        } else if (pontuacaoJogador1 < pontuacaoJogador2) {
-            jogador2.addTentos(pontos);
-            Jogo.informarGanhadorPontos(jogador2, jogador1, acao, pontos);
-        } else {
-            //Empate indica que o jogador que iniciou a jogar(iniciou a mão) ganha os pontos
-            jogadorMao.addTentos(pontos);
-            Jogo.informarGanhadorPontos(jogadorMao, jogadorMao.equals(jogador1) ? jogador2 : jogador1, acao, pontos);
+    private static void chamarFlor(Mao mao, Rodada rodadaAtual, Jogador jogador1, Jogador jogador2, Mensagem<Jogada> msgOutroJogador, Jogador jogadorMao, int pontoAcumulados) throws IOException, ClassNotFoundException {
+        enviarDadosJogada(jogador2, jogador1, mao, msgOutroJogador);
+        mao.setChamadoEnvido(true);
+        Mensagem<Jogada> msgJogadaJogador2 = jogador2.getConexao().receber();
+        Util.printarRecebimentoInfo(jogador2, msgJogadaJogador2);
+        rodadaAtual.getJogadas().add(msgJogadaJogador2.getValor());
+        switch (msgJogadaJogador2.getValor().getAcaoDaJogada()) {
+            case BOA:
+                jogador1.addTentos(PONTOS_FLOR);
+                jogador1.getConexao().enviar(new Mensagem<>(AcaoDaMensagem.INFO_JOGADA_OPONENTE, msgJogadaJogador2.getValor()));
+                return;
+            case CONTRA_FLOR:
+                Jogo.chamarContraFlor(mao, rodadaAtual, jogador2, jogador1, msgJogadaJogador2, jogadorMao, 1, false);
+                return;
+            case CONTRA_FLOR_E_RESTO:
+                chamarContraFlor(mao, rodadaAtual, jogador2, jogador1, msgJogadaJogador2, jogadorMao, 1, true);
+                return;
+            default:
+                //Se chegar aqui, indica que houve algum problema.(Qual? não sei)
+                return;
         }
     }
 
-    private static int calcularPontosJogador(Jogador jogador) {
+    private static void chamarContraFlor(Mao mao, Rodada rodadaAtual, Jogador jogador1, Jogador jogador2, Mensagem<Jogada> msgOutroJogador, Jogador jogadorMao, int pontoAcumulados, boolean isContraFlorEOResto) throws IOException, ClassNotFoundException {
+        enviarDadosJogada(jogador2, jogador1, mao, msgOutroJogador);
+        mao.setChamadoEnvido(true);
+        Mensagem<Jogada> msgJogadaJogador2 = jogador2.getConexao().receber();
+        Util.printarRecebimentoInfo(jogador2, msgJogadaJogador2);
+        rodadaAtual.getJogadas().add(msgJogadaJogador2.getValor());
+        switch (msgJogadaJogador2.getValor().getAcaoDaJogada()) {
+            case QUERO:
+                int pontos = PONTOS_CONTRA_FLOR;
+                if (isContraFlorEOResto) {
+                    pontos = obtemPontosFALTA(jogador1, jogador2);
+                }
+                Jogo.calcularGanhadorContraFlor(jogador1, jogador2, pontos, jogadorMao, isContraFlorEOResto ? AcaoDaJogada.CONTRA_FLOR_E_RESTO : AcaoDaJogada.CONTRA_FLOR);
+                return;
+            case NAO_QUERO:
+                jogador1.addTentos(PONTOS_FLOR + pontoAcumulados);
+                jogador1.getConexao().enviar(new Mensagem<>(AcaoDaMensagem.INFO_JOGADA_OPONENTE, msgJogadaJogador2.getValor()));
+                return;
+            default:
+                //Se chegar aqui, indica que houve algum problema.(Qual? não sei)
+                return;
+        }
+    }
+
+    private static void calcularGanhadorDosPontos(Jogador jogador1, Jogador jogador2, int pontos, Jogador jogadorMao, AcaoDaJogada acao) throws IOException {
+        int pontuacaoJogador1 = calcularPontosEnvidoJogador(jogador1);
+        int pontuacaoJogador2 = calcularPontosEnvidoJogador(jogador2);
+        if (pontuacaoJogador1 > pontuacaoJogador2) {
+            jogador1.addTentos(pontos);
+            Jogo.informarGanhadorPontos(jogador1, pontuacaoJogador1, jogador2, pontuacaoJogador2, acao, pontos);
+        } else if (pontuacaoJogador1 < pontuacaoJogador2) {
+            jogador2.addTentos(pontos);
+            Jogo.informarGanhadorPontos(jogador2, pontuacaoJogador2, jogador1, pontuacaoJogador1, acao, pontos);
+        } else {
+            //Empate indica que o jogador que iniciou a jogar(iniciou a mão) ganha os pontos
+            jogadorMao.addTentos(pontos);
+            boolean isJogador1JogadorMao = jogadorMao.equals(jogador1);
+            Jogo.informarGanhadorPontos(jogadorMao, isJogador1JogadorMao ? pontuacaoJogador1 : pontuacaoJogador2, isJogador1JogadorMao ? jogador2 : jogador1, isJogador1JogadorMao ? pontuacaoJogador2 : pontuacaoJogador1, acao, pontos);
+        }
+    }
+
+    private static int calcularPontosEnvidoJogador(Jogador jogador) {
         boolean possuiCartasMesmoNaipe = Jogo.possuiDuasCartasMesmoNaipe(jogador);
         int pontosFinal = possuiCartasMesmoNaipe ? 20 : 0;
         List<Carta> cartasToEnvido = new ArrayList<>(jogador.getCartas());
@@ -738,8 +794,8 @@ public class Jogo {
      * @param acao
      * @throws IOException
      */
-    private static void informarGanhadorPontos(Jogador jogadorVencedor, Jogador jogador2, AcaoDaJogada acao, int tentos) throws IOException {
-        EnvidoInfo env = new EnvidoInfo(jogadorVencedor.getInfoJogador(), calcularPontosJogador(jogadorVencedor), jogador2.getInfoJogador(), calcularPontosJogador(jogador2), acao, tentos);
+    private static void informarGanhadorPontos(Jogador jogadorVencedor, int pontosVencedor, Jogador jogador2, int pontosJogador2, AcaoDaJogada acao, int tentos) throws IOException {
+        PontosInfo env = new PontosInfo(jogadorVencedor.getInfoJogador(), pontosVencedor, jogador2.getInfoJogador(), pontosJogador2, acao, tentos);
         jogadorVencedor.getConexao().enviar(new Mensagem<>(AcaoDaMensagem.INFO_VENCEDOR_PONTOS, env));
         jogador2.getConexao().enviar(new Mensagem<>(AcaoDaMensagem.INFO_VENCEDOR_PONTOS, env));
     }
@@ -773,6 +829,29 @@ public class Jogo {
             return true;
         }
         return false;
+    }
+
+    private static void calcularGanhadorContraFlor(Jogador jogador1, Jogador jogador2, int pontos, Jogador jogadorMao, AcaoDaJogada acaoDaJogada) throws IOException {
+        int pontosFlorJogador1 = calcularPontosFlor(jogador1);
+        int pontosFlorJogador2 = calcularPontosFlor(jogador2);
+        if (pontosFlorJogador1 > pontosFlorJogador2) {
+            jogador1.addTentos(pontos);
+            Jogo.informarGanhadorPontos(jogador1, pontosFlorJogador1, jogador2, pontosFlorJogador2, acaoDaJogada, pontos);
+        } else if (pontosFlorJogador1 < pontosFlorJogador2) {
+            jogador2.addTentos(pontos);
+            Jogo.informarGanhadorPontos(jogador2, pontosFlorJogador2, jogador1, pontosFlorJogador1, acaoDaJogada, pontos);
+        } else {
+            //Indica que houve empate
+            jogadorMao.addTentos(pontos);
+            boolean isJogador1JogadorMao = jogadorMao.equals(jogador1);
+            Jogo.informarGanhadorPontos(jogadorMao, isJogador1JogadorMao ? pontosFlorJogador1 : pontosFlorJogador2, isJogador1JogadorMao ? jogador2 : jogador1, isJogador1JogadorMao ? pontosFlorJogador2 : pontosFlorJogador1, acaoDaJogada, pontos);
+        }
+    }
+
+    private static int calcularPontosFlor(Jogador jogador) {
+        int pontosFinal = 20;
+        List<Carta> cartasToEnvido = new ArrayList<>(jogador.getCartas());
+        return cartasToEnvido.stream().map((carta) -> carta.getPontosSomadosNoEnvido()).reduce(pontosFinal, Integer::sum);
     }
 
 }

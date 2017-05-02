@@ -19,10 +19,14 @@
             <file>file:/C:/Users/alenc/Documents/_gitProjects/RedesCompuadoresI/RedesComputadoresI/JogoDeTruco/src/comunicacao/transporte/PartidasInfo.java</file>
         </group>
         <group name="github">
-            <file>file:/C:/alencar/RedesComputadoresI/JogoDeTruco/src/main/ServidorMain.java</file>
+            <file>file:/C:/alencar/RedesComputadoresI/JogoDeTruco/src/jogo/Rodada.java</file>
             <file>file:/C:/alencar/RedesComputadoresI/JogoDeTruco/src/jogo/Partida.java</file>
             <file>file:/C:/alencar/RedesComputadoresI/JogoDeTruco/src/comunicacao/ControladorConexao.java</file>
             <file>file:/C:/alencar/RedesComputadoresI/JogoDeTruco/src/main/ClienteMain.java</file>
+            <file>file:/C:/alencar/RedesComputadoresI/JogoDeTruco/src/comunicacao/transporte/JogadorInfo.java</file>
+            <file>file:/C:/alencar/RedesComputadoresI/JogoDeTruco/src/jogo/Jogador.java</file>
+            <file>file:/C:/alencar/RedesComputadoresI/JogoDeTruco/src/util/Util.java</file>
+            <file>file:/C:/alencar/RedesComputadoresI/JogoDeTruco/src/comunicacao/Mensagem.java</file>
             <file>file:/C:/alencar/RedesComputadoresI/JogoDeTruco/src/jogo/Jogo.java</file>
         </group>
     </open-files>

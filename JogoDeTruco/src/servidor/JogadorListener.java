@@ -41,6 +41,7 @@ public class JogadorListener extends Thread implements Serializable {
     @Override
     public void run() {
         try {
+            this.jogador.setTentos(0);
             enviarInformacoesDeUsuario();
             this.partidaDesteJogador = null;
             while (this.jogador.getConexao().isConectionOpen() && this.partidaDesteJogador == null) {
