@@ -210,7 +210,7 @@ public class Partida extends Thread {
                 }
             }
             if (mao.getJogadorGanhador() == null) {
-                calcularGanhadorDaMao(mao);
+                calcularGanhadorDaMao(mao, jogadorMao);
             }
             if (existeGanhadorPartida()) {
                 //Retorna para o while principal
@@ -251,34 +251,49 @@ public class Partida extends Thread {
         });
     }
 
-    private void calcularGanhadorDaMao(Mao mao) {
-        //rodada atual vai ser adicionada na lista Mao.rodadas após 
+    private void calcularGanhadorDaMao(Mao mao, Jogador jogadorMao) {
+        boolean primeiraRodadaEmpatou, segundaRodadaEmpatou, terceiraRodadaEmpatou;
         switch (mao.getRodadas().size()) {
             case 0:
                 return;
             case 1:
                 return;
             case 2:
-                if (mao.getRodadas().get(0).isEmpatou()) {
-                    //Se empatou a 1ª rodada, o jogador que ganhar a 2ª vence.
-                    if (mao.getRodadas().get(1).isEmpatou()) {
-                        //TODO: se empatou a primeira e a segunda, o ganhador da terceira rodada vence.
-                        //  Se empatar as 3 rodadas, o jogador mão vence.
-                    }
+                primeiraRodadaEmpatou = mao.getRodadas().get(0).isEmpatou();
+                segundaRodadaEmpatou = mao.getRodadas().get(1).isEmpatou();
+                if (primeiraRodadaEmpatou && segundaRodadaEmpatou) {
+                    //Se ambas rodadas empataram, deverá ir para terceira rodada
+                    return;
+                } else if (primeiraRodadaEmpatou && !segundaRodadaEmpatou) {
+                    //Se a primeira rodada empatou e houve um ganhador na segunda, este é o ganhador da mão.
                     Jogo.definirGanhadorMao(mao, mao.getRodadas().get(1).getJogadorGanhador());
-                } else if (mao.getRodadas().get(1).isEmpatou()) {
-                    //Se empatou a 2ª rodada, o jogador que ganhou 1ª vence
+                    return;
+                } else if (!primeiraRodadaEmpatou && segundaRodadaEmpatou) {
+                    //Se a segunda rodada empatou e houve ganhador na primeira rodada, o ganhador da primeira rodada é o ganhador da mão
                     Jogo.definirGanhadorMao(mao, mao.getRodadas().get(0).getJogadorGanhador());
+                    return;
                 }
                 //Verifica se um dos jogadores ganhou as duas primeiras rodadas
                 calcularJogadorGanhador(mao);
                 return;
             case 3:
-                if (mao.getRodadas().get(2).isEmpatou()) {
-                    //Se empatou a 3ª rodada, o jogador que ganhou a 2ª vence.
-                    //TODO: verificar se outras rodadas também não empataram
-                    Jogo.definirGanhadorMao(mao, mao.getRodadas().get(1).getJogadorGanhador());
+                primeiraRodadaEmpatou = mao.getRodadas().get(0).isEmpatou();
+                segundaRodadaEmpatou = mao.getRodadas().get(1).isEmpatou();
+                terceiraRodadaEmpatou = mao.getRodadas().get(2).isEmpatou();
+                if (primeiraRodadaEmpatou && segundaRodadaEmpatou && terceiraRodadaEmpatou) {
+                    //Se as três rodadas empataram, o jogadorMão é o ganhador da mão
+                    Jogo.definirGanhadorMao(mao, jogadorMao);
+                    return;
+                } else if (primeiraRodadaEmpatou && segundaRodadaEmpatou && !terceiraRodadaEmpatou) {
+                    //Se as duas primeira rodadas empataram, o ganhador da terceira é o ganhador da mão
+                    Jogo.definirGanhadorMao(mao, mao.getRodadas().get(2).getJogadorGanhador());
+                    return;
+                } else if (!primeiraRodadaEmpatou && !segundaRodadaEmpatou && terceiraRodadaEmpatou) {
+                    //Se empatou a terceira rodada, o ganhador da 1ª rodada é o ganhador da mão
+                    Jogo.definirGanhadorMao(mao, mao.getRodadas().get(0).getJogadorGanhador());
+                    return;
                 }
+                //Verifica o ganhador da mão
                 calcularJogadorGanhador(mao);
         }
     }

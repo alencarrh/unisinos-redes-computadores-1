@@ -45,14 +45,17 @@ public class Servidor implements Serializable {
         System.out.println("Servidor Iniciado...");
         while (isRodando()) {
             ControladorConexao<Mensagem> novaConexao = new ControladorConexao(serverSocket.accept());
-            //Conexão é a única diferença para determinar se o jogador já existe ou não.
-            JogadorListener temp = new JogadorListener(new Jogador(null, null, novaConexao));
-            if (!JOGADORES.contains(temp)) {
-                Jogador novoJogador = new Jogador(getNextJogadorId(), Util.gerarNomeAleatorio(), novaConexao);
-                JogadorListener novoJogadorListener = new JogadorListener(novoJogador);
-                JOGADORES.add(novoJogadorListener);
-                novoJogadorListener.start();
-            }
+
+            Jogador novoJogador = new Jogador(getNextJogadorId(), Util.gerarNomeAleatorio(), novaConexao);
+            JogadorListener novoJogadorListener = new JogadorListener(novoJogador);
+            JOGADORES.add(novoJogadorListener);
+            novoJogadorListener.start();
+            
+//INFO: TODO: acredito que ser necessário a verificação da pré-existência da conexão.
+//Conexão é a única diferença para determinar se o jogador já existe ou não.
+//            JogadorListener temp = new JogadorListener(new Jogador(null, null, novaConexao));
+//            if (!JOGADORES.contains(temp)) {
+//            }
         }
     }
 
@@ -89,6 +92,11 @@ public class Servidor implements Serializable {
         this.serverSocket.close();
     }
 
+    /**
+     * Retorna o status que o servidor se encontra[RODADNDO ou PARADO]
+     *
+     * @return
+     */
     public boolean isRodando() {
         return rodando;
     }

@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 /**
- *
- * @created 02/05/2017
- * @author alencar.hentges (CWI Software)
+ * @class Teclado
+ * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
+ * @date 02/05/2017
  */
 public class Teclado {
 
