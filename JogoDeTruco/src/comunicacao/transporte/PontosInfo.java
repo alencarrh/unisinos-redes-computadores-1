@@ -4,9 +4,9 @@ import enums.AcaoDaJogada;
 import java.io.Serializable;
 
 /**
- *
- * @created 24/04/2017
- * @author alencar.hentges (CWI Software)
+ * @class PontosInfo
+ * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
+ * @date 24/04/2017
  */
 public class PontosInfo implements Serializable {
 

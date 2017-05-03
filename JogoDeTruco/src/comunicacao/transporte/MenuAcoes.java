@@ -6,9 +6,9 @@ import java.util.List;
 import jogo.Jogada;
 
 /**
- *
- * @created 17/04/2017
- * @author alencar.hentges (CWI Software)
+ * @class MenuAcoes
+ * @author Alencar Rodrigo Hentges <alencarhentges@gmail.com>
+ * @date 17/04/2017
  */
 public class MenuAcoes implements Serializable {
 
